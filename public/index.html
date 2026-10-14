@@ -1177,6 +1177,133 @@
       }
     }
 
+    /* Q&A / FAQ Modal Box */
+    .qa-modal-box {
+      width: min(880px, 92vw) !important;
+      max-width: 95vw !important;
+      max-height: 88vh;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      padding: 22px 24px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .qa-modal-box.maximized {
+      width: 96vw !important;
+      max-width: 96vw !important;
+      height: 94vh !important;
+      max-height: 94vh !important;
+      border-radius: 14px;
+      padding: 18px 24px;
+    }
+    .qa-content-list {
+      max-height: 72vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-right: 6px;
+      flex: 1;
+    }
+    .qa-modal-box.maximized .qa-content-list {
+      max-height: calc(94vh - 90px) !important;
+    }
+    .qa-item {
+      background: rgba(18, 22, 32, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 14px 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .qa-item:hover {
+      border-color: rgba(56, 189, 248, 0.3);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+    .qa-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .qa-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .qa-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 500;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+    .qa-desc {
+      font-size: 12.5px;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    .qa-desc b {
+      color: #e2e8f0;
+    }
+    .qa-desc code {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #38bdf8;
+      font-size: 12px;
+      font-family: monospace;
+    }
+    .qa-cmd-card {
+      margin-top: 10px;
+      background: #090d16;
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .qa-cmd-text {
+      font-family: monospace;
+      font-size: 12px;
+      color: #7dd3fc;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .qa-copy-btn {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .qa-copy-btn:hover {
+      background: #38bdf8;
+      color: #0f172a;
+    }
+    @media (max-width: 768px) {
+      .qa-modal-box {
+        width: 96vw !important;
+        padding: 16px !important;
+      }
+      .qa-modal-box .qa-content-list {
+        max-height: 68vh;
+      }
+    }
+
     /* Mobile Sticky Chat Bar */
     .chat-bar-container {
       position: fixed;
@@ -1701,6 +1828,7 @@
     <button class="tool-btn" id="testSoundBtn">🔊 测试声音</button>
     <button class="tool-btn" id="testVibrateBtn">📳 测试震动</button>
     <button class="tool-btn" id="notifyBtn">🔔 网页通知</button>
+    <button class="tool-btn" id="qaModalBtn" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">❓ 帮助与Q&A</button>
   </div>
 
   <!-- Main View -->
@@ -1964,6 +2092,137 @@
       </div>
       <div id="chatHistoryContentList">
         <div style="text-align: center; color: #94a3b8; padding: 20px 0; font-size: 13px;">加载历史记录中...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q&A / Troubleshooting Modal -->
+  <div class="modal-overlay" id="qaModalOverlay">
+    <div class="modal-box qa-modal-box" id="qaModalBox">
+      <div style="position: absolute; top: 14px; right: 14px; display: flex; align-items: center; gap: 8px;">
+        <button id="toggleQaMaximizeBtn" class="modal-action-btn" title="最大化/还原窗口" type="button">⛶</button>
+        <button id="closeQaModalBtn" class="modal-close-btn" type="button">&times;</button>
+      </div>
+      <div style="font-size: 17px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+        <span>❓ 常见问题排查与维护指南 (Q&A)</span>
+      </div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">
+        遇到网络无法连接、Hermes 更新后挂件恢复或常用运维管理命令？请参考以下指引
+      </div>
+
+      <div class="qa-content-list" id="qaContentList">
+        <!-- Q1 -->
+        <div class="qa-item">
+          <div class="qa-header">
+            <div class="qa-title">
+              <span>🌐 电脑本机打不开 http://192.168.x.x:8649，但手机可以打开？</span>
+            </div>
+            <span class="qa-tag">局域网与网络</span>
+          </div>
+          <div class="qa-desc">
+            <b>原因分析：</b>本项目服务运行在 Windows 的 WSL2 虚拟环境中。手机访问走物理无线网卡端口转发进 WSL2，所以正常；而电脑本机若直接输入自己的物理局域网 IP，请求在 Windows 宿主机网络栈内部回环时<b>缺少 Hairpin NAT 转发支持</b>，会被系统拦截。<br>
+            <b>解决方案：</b><br>
+            • 💻 <b>电脑本机浏览器：</b>请始终使用 <code>http://localhost:8649</code> 访问。<br>
+            • 📱 <b>外部手机/平板：</b>连接同一 Wi-Fi 后，使用 <code>http://192.168.31.159:8649</code> 访问（或直接扫码）。
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="qa-item">
+          <div class="qa-header">
+            <div class="qa-title">
+              <span>🔄 Hermes Web UI 升级后，电脑网页右下角看护小圆球不见了？</span>
+            </div>
+            <span class="qa-tag">版本更新与挂件</span>
+          </div>
+          <div class="qa-desc">
+            <b>原因分析：</b>升级 Hermes Web UI 时，npm 会覆盖其前端静态客户端文件（<code>index.html</code>），导致注入的挂件标签被覆盖。<b>此时看护助手后台服务、所有配置及手机端均正常运行，未受任何损坏</b>。<br>
+            <b>一键恢复方法：</b>在电脑终端中执行下方命令，即可重新自动注入并恢复：
+          </div>
+          <div class="qa-cmd-card">
+            <code class="qa-cmd-text">cd ~/.hermes-web-ui/mobile-watch && ./mobile-watch.sh install-widget</code>
+            <button class="qa-copy-btn" data-copy="cd ~/.hermes-web-ui/mobile-watch && ./mobile-watch.sh install-widget">复制命令</button>
+          </div>
+          <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;">
+            💡 运行完成后，在电脑端 <code>http://localhost:8648</code> 页面按 <b>Ctrl + F5</b> 强制刷新即可恢复悬浮球。
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="qa-item">
+          <div class="qa-header">
+            <div class="qa-title">
+              <span>🛡️ 看护助手代码会被 Hermes 升级替代或清除吗？</span>
+            </div>
+            <span class="qa-tag">数据与安全</span>
+          </div>
+          <div class="qa-desc">
+            <b>结论：绝对不会！代码百分百安全。</b><br>
+            1. <code>~/.hermes-web-ui</code> 是您的持久化用户数据目录（存放数据库与个人配置），Hermes 更新只会替换其 npm 安装包，绝不会清空用户的个人目录。<br>
+            2. 本项目 <code>mobile-watch</code> 目录已独立初始化为 <b>Git 仓库（main 分支）</b>，享有完整的本地版本控制与提交记录保护。
+          </div>
+          <div class="qa-cmd-card">
+            <code class="qa-cmd-text">cd ~/.hermes-web-ui/mobile-watch && git status</code>
+            <button class="qa-copy-btn" data-copy="cd ~/.hermes-web-ui/mobile-watch && git status">查看 Git 状态</button>
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="qa-item">
+          <div class="qa-header">
+            <div class="qa-title">
+              <span>🖱️ 电脑端右下角的看护小圆球遮挡了输入框或发送/停止按钮？</span>
+            </div>
+            <span class="qa-tag">界面与交互</span>
+          </div>
+          <div class="qa-desc">
+            <b>最新优化说明：</b><br>
+            • <b>自由拖拽：</b>悬浮球现已全面支持鼠标左键按住<b>自由拖拽</b>，可拉至屏幕任意空白位置。<br>
+            • <b>智能防误触：</b>轻点触发弹窗，拖动距离超过 5px 时只调整位置不会意外弹窗。<br>
+            • <b>持久化位置记忆：</b>拖拽松手后会自动保存坐标到 <code>localStorage</code>，后续刷新网页将保持在您设定的位置。<br>
+            • <b>极简无字：</b>已去除非必要的长文字，仅保留 40×40px 微型毛玻璃小圆球。
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="qa-item">
+          <div class="qa-header">
+            <div class="qa-title">
+              <span>⚡ 看护助手常用运维管理命令速查（终端执行）</span>
+            </div>
+            <span class="qa-tag">常用命令</span>
+          </div>
+          <div class="qa-desc" style="display: flex; flex-direction: column; gap: 8px;">
+            <div>
+              <div style="font-weight: 600; color: #cbd5e1; margin-bottom: 4px;">1. 查看服务运行状态与手机二维码：</div>
+              <div class="qa-cmd-card" style="margin-top: 0;">
+                <code class="qa-cmd-text">cd ~/.hermes-web-ui/mobile-watch && ./mobile-watch.sh status</code>
+                <button class="qa-copy-btn" data-copy="cd ~/.hermes-web-ui/mobile-watch && ./mobile-watch.sh status">复制</button>
+              </div>
+            </div>
+            <div>
+              <div style="font-weight: 600; color: #cbd5e1; margin-bottom: 4px;">2. 重启看护助手服务（配置变更或故障热重启）：</div>
+              <div class="qa-cmd-card" style="margin-top: 0;">
+                <code class="qa-cmd-text">cd ~/.hermes-web-ui/mobile-watch && ./mobile-watch.sh restart</code>
+                <button class="qa-copy-btn" data-copy="cd ~/.hermes-web-ui/mobile-watch && ./mobile-watch.sh restart">复制</button>
+              </div>
+            </div>
+            <div>
+              <div style="font-weight: 600; color: #cbd5e1; margin-bottom: 4px;">3. 实时查看后台日志流：</div>
+              <div class="qa-cmd-card" style="margin-top: 0;">
+                <code class="qa-cmd-text">tail -f ~/.hermes-web-ui/mobile-watch/server.log</code>
+                <button class="qa-copy-btn" data-copy="tail -f ~/.hermes-web-ui/mobile-watch/server.log">复制</button>
+              </div>
+            </div>
+            <div>
+              <div style="font-weight: 600; color: #cbd5e1; margin-bottom: 4px;">4. 停止看护助手服务：</div>
+              <div class="qa-cmd-card" style="margin-top: 0;">
+                <code class="qa-cmd-text">cd ~/.hermes-web-ui/mobile-watch && ./mobile-watch.sh stop</code>
+                <button class="qa-copy-btn" data-copy="cd ~/.hermes-web-ui/mobile-watch && ./mobile-watch.sh stop">复制</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -3496,6 +3755,54 @@
 
     chatHistoryModalOverlay.addEventListener('click', (e) => {
       if (e.target === chatHistoryModalOverlay) chatHistoryModalOverlay.classList.remove('active');
+    });
+
+    // Q&A Modal Controls
+    const qaModalOverlay = document.getElementById('qaModalOverlay');
+    const qaModalBtn = document.getElementById('qaModalBtn');
+    const closeQaModalBtn = document.getElementById('closeQaModalBtn');
+    const toggleQaMaximizeBtn = document.getElementById('toggleQaMaximizeBtn');
+    const qaModalBox = document.getElementById('qaModalBox');
+
+    if (qaModalBtn) {
+      qaModalBtn.addEventListener('click', () => {
+        qaModalOverlay.classList.add('active');
+      });
+    }
+    if (closeQaModalBtn) {
+      closeQaModalBtn.addEventListener('click', () => {
+        qaModalOverlay.classList.remove('active');
+      });
+    }
+    if (qaModalOverlay) {
+      qaModalOverlay.addEventListener('click', (e) => {
+        if (e.target === qaModalOverlay) qaModalOverlay.classList.remove('active');
+      });
+    }
+    if (toggleQaMaximizeBtn && qaModalBox) {
+      toggleQaMaximizeBtn.addEventListener('click', () => {
+        qaModalBox.classList.toggle('maximized');
+        toggleQaMaximizeBtn.textContent = qaModalBox.classList.contains('maximized') ? '🗗' : '⛶';
+      });
+    }
+
+    // QA Copy Buttons
+    document.querySelectorAll('.qa-copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const text = btn.getAttribute('data-copy');
+        if (text) {
+          navigator.clipboard.writeText(text);
+          const orig = btn.textContent;
+          btn.textContent = '已复制!';
+          btn.style.borderColor = '#10b981';
+          btn.style.color = '#10b981';
+          setTimeout(() => {
+            btn.textContent = orig;
+            btn.style.borderColor = '';
+            btn.style.color = '';
+          }, 2000);
+        }
+      });
     });
 
     // Proactive session fetch

@@ -1589,6 +1589,53 @@
         </div>
       `;
 
+      const faqTabHtml = `
+        <div style="display:flex; flex-direction:column; gap:12px; max-height:420px; overflow-y:auto; padding-right:4px;">
+          <div class="hm-feature-card">
+            <div style="font-size:13px; font-weight:600; color:#38bdf8; margin-bottom:4px;">🌐 电脑打不开 192.168.x.x:8649，但手机能开？</div>
+            <div style="font-size:11.5px; color:#94a3b8; line-height:1.5;">
+              WSL2 环境下 Windows 访问自己物理网卡缺少回环 NAT 支持。<b>电脑请直接访问：</b><code style="color:#38bdf8;">http://localhost:8649</code>；<b>手机连接同一 Wi-Fi 后使用：</b><code style="color:#38bdf8;">${info.lanUrl || '局域网IP'}</code>。
+            </div>
+          </div>
+
+          <div class="hm-feature-card">
+            <div style="font-size:13px; font-weight:600; color:#38bdf8; margin-bottom:4px;">🔄 Hermes 升级后右下角小圆球不见了？</div>
+            <div style="font-size:11.5px; color:#94a3b8; line-height:1.5; margin-bottom:6px;">
+              Hermes 升级会覆盖前端静态页面，核心看护代码绝对安全。在终端运行下方命令即可 1 秒重新注入恢复：
+            </div>
+            <div style="background:#090d16; border:1px solid rgba(56,189,248,0.25); border-radius:6px; padding:6px 10px; display:flex; align-items:center; justify-content:space-between; gap:6px;">
+              <code style="font-size:11px; color:#7dd3fc; word-break:break-all;">cd ~/.hermes-web-ui/mobile-watch && ./mobile-watch.sh install-widget</code>
+              <button class="hm-qa-copy-btn" data-copy="cd ~/.hermes-web-ui/mobile-watch && ./mobile-watch.sh install-widget" style="background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; border-radius:4px; padding:2px 8px; font-size:11px; cursor:pointer; white-space:nowrap;">复制</button>
+            </div>
+          </div>
+
+          <div class="hm-feature-card">
+            <div style="font-size:13px; font-weight:600; color:#38bdf8; margin-bottom:4px;">🖱️ 悬浮球遮挡了输入框或按钮？</div>
+            <div style="font-size:11.5px; color:#94a3b8; line-height:1.5;">
+              悬浮球已支持<b>鼠标左键自由拖拽</b>！按住小球拖到屏幕任意边缘松开，系统会自动持久化记忆位置，刷新页面依然保留在您拖拽的位置。
+            </div>
+          </div>
+
+          <div class="hm-feature-card">
+            <div style="font-size:13px; font-weight:600; color:#38bdf8; margin-bottom:6px;">⚡ 常用运维管理命令速查</div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; background:#090d16; padding:5px 8px; border-radius:6px;">
+                <span style="font-size:11px; color:#cbd5e1;">重启看护服务:</span>
+                <button class="hm-qa-copy-btn" data-copy="cd ~/.hermes-web-ui/mobile-watch && ./mobile-watch.sh restart" style="background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; border-radius:4px; padding:2px 8px; font-size:11px; cursor:pointer;">复制 restart</button>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; background:#090d16; padding:5px 8px; border-radius:6px;">
+                <span style="font-size:11px; color:#cbd5e1;">查看服务状态:</span>
+                <button class="hm-qa-copy-btn" data-copy="cd ~/.hermes-web-ui/mobile-watch && ./mobile-watch.sh status" style="background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; border-radius:4px; padding:2px 8px; font-size:11px; cursor:pointer;">复制 status</button>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; background:#090d16; padding:5px 8px; border-radius:6px;">
+                <span style="font-size:11px; color:#cbd5e1;">实时查看日志:</span>
+                <button class="hm-qa-copy-btn" data-copy="tail -f ~/.hermes-web-ui/mobile-watch/server.log" style="background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; border-radius:4px; padding:2px 8px; font-size:11px; cursor:pointer;">复制 log</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
       overlay.innerHTML = `
         <div class="hm-modal">
           <div class="hm-modal-header">
@@ -1606,10 +1653,13 @@
             <button class="hm-tab-btn ${activeTab === 'mobile' ? 'active' : ''}" id="hmTabMobile">
               <span>📱 手机协同</span>
             </button>
+            <button class="hm-tab-btn ${activeTab === 'faq' ? 'active' : ''}" id="hmTabFaq">
+              <span>❓ 常见Q&A</span>
+            </button>
           </div>
 
           <div class="hm-modal-content">
-            ${activeTab === 'desktop' ? desktopTabHtml : mobileTabHtml}
+            ${activeTab === 'desktop' ? desktopTabHtml : (activeTab === 'mobile' ? mobileTabHtml : faqTabHtml)}
           </div>
         </div>
       `;
@@ -1628,6 +1678,24 @@
         activeTab = 'mobile';
         renderModalContent();
       };
+      const faqTabBtn = overlay.querySelector('#hmTabFaq');
+      if (faqTabBtn) {
+        faqTabBtn.onclick = () => {
+          activeTab = 'faq';
+          renderModalContent();
+        };
+      }
+      overlay.querySelectorAll('.hm-qa-copy-btn').forEach(btn => {
+        btn.onclick = () => {
+          const text = btn.getAttribute('data-copy');
+          if (text) {
+            navigator.clipboard.writeText(text);
+            const orig = btn.textContent;
+            btn.textContent = '已复制!';
+            setTimeout(() => { btn.textContent = orig; }, 2000);
+          }
+        };
+      });
 
       const copyBtn = overlay.querySelector('#hmCopyBtn');
       if (copyBtn) {
