@@ -4,6 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
 [![Hermes](https://img.shields.io/badge/Hermes-Compatible-orange.svg)](https://github.com/)
+[![Co-created with Gemini](https://img.shields.io/badge/Co--created%20with-Gemini%20AI-4285F4?logo=google&logoColor=white)](https://gemini.google.com)
 
 ---
 
@@ -121,3 +122,11 @@ A: 在 PC 浏览器打开 `http://localhost:8648` 或 `http://localhost:8649` �
 ## 📄 开源许可证
 
 本项目基于 [MIT License](LICENSE) 开源发布。
+
+---
+
+## 🙏 致谢 / Acknowledgements
+
+本项目在架构设计、移动端前端适配与全链路联调过程中，由 **Gemini / Antigravity AI** 辅助结对编程共同构建完成。
+特别感谢开源社区对自主智能体（Autonomous Agent）生态的持续探索与贡献！
+
