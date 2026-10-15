@@ -6,7 +6,12 @@ import { fileURLToPath } from 'node:url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const logPath = path.join(__dirname, 'server.log')
 const pidPath = path.join(__dirname, 'server.pid')
-const pDir = path.resolve(__dirname, '..', 'hermes-web-ui-pereview', 'node_modules')
+const candidateDirs = [
+  path.resolve(__dirname, 'node_modules'),
+  path.resolve(__dirname, '..', 'hermes-web-ui-pereview', 'node_modules'),
+  path.resolve(__dirname, '..', 'node_modules')
+]
+const pDir = candidateDirs.find(d => fs.existsSync(d)) || ''
 
 // Check if already running
 if (fs.existsSync(pidPath)) {

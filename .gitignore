@@ -1,11 +1,19 @@
-# 日志文件
+# 配置文件（个人私密配置，请复制 config.example.json 使用）
+config.json
+
+# 日志与进程文件
 *.log
 logs/
+*.pid
 
 # 备份与临时文件
 *.bak
 *.bak*
 *.tmp
+*.original
+
+# 依赖包
+node_modules/
 
 # 系统文件
 .DS_Store

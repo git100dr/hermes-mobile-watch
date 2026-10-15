@@ -29,6 +29,15 @@ let config = {
   vibrateAlert: true
 }
 
+const EXAMPLE_CONFIG_FILE = path.join(__dirname, 'config.example.json')
+
+if (!fs.existsSync(CONFIG_FILE) && fs.existsSync(EXAMPLE_CONFIG_FILE)) {
+  try {
+    fs.copyFileSync(EXAMPLE_CONFIG_FILE, CONFIG_FILE)
+    console.log('[Config] Initialized config.json from config.example.json')
+  } catch {}
+}
+
 if (fs.existsSync(CONFIG_FILE)) {
   try {
     const loaded = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'))
@@ -47,7 +56,7 @@ function saveConfig() {
 }
 
 // Database Path
-const DB_PATH = path.resolve(__dirname, '..', 'hermes-web-ui.db')
+const DB_PATH = process.env.HERMES_DB_PATH || path.resolve(__dirname, '..', 'hermes-web-ui.db')
 
 function formatTokens(num) {
   if (num == null) return '0'

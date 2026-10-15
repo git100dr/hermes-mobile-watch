@@ -4,11 +4,34 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PID_FILE="$DIR/server.pid"
 LOG_FILE="$DIR/server.log"
-NP_DIR="$DIR/../hermes-web-ui-pereview/node_modules"
+# Detect node_modules directory for optional modules (qrcode, etc.)
+NP_DIR="${HERMES_NODE_MODULES:-}"
+if [ -z "$NP_DIR" ] || [ ! -d "$NP_DIR" ]; then
+  for cand in "$DIR/node_modules" "$DIR/../hermes-web-ui-pereview/node_modules" "$DIR/../node_modules"; do
+    if [ -d "$cand" ]; then
+      NP_DIR="$cand"
+      break
+    fi
+  done
+fi
 
-# Detect dist/client/index.html location
-DIST_INDEX="/home/binz/.npm/_npx/8637e728a429de27/node_modules/hermes-web-ui/dist/client/index.html"
-BACKUP_INDEX="$DIST_INDEX.original"
+# Detect hermes-web-ui dist/client/index.html location (for optional PC widget injection)
+DIST_INDEX="${HERMES_WEB_UI_INDEX:-}"
+if [ -z "$DIST_INDEX" ] || [ ! -f "$DIST_INDEX" ]; then
+  if [ -d "$HOME/.npm/_npx" ]; then
+    DIST_INDEX=$(find "$HOME/.npm/_npx" -name "index.html" -path "*/hermes-web-ui/dist/client/index.html" 2>/dev/null | head -n 1 || true)
+  fi
+  if [ -z "$DIST_INDEX" ]; then
+    GLOBAL_NPM=$(npm root -g 2>/dev/null || true)
+    if [ -n "$GLOBAL_NPM" ] && [ -f "$GLOBAL_NPM/hermes-web-ui/dist/client/index.html" ]; then
+      DIST_INDEX="$GLOBAL_NPM/hermes-web-ui/dist/client/index.html"
+    fi
+  fi
+  if [ -z "$DIST_INDEX" ] && [ -f "$DIR/../dist/client/index.html" ]; then
+    DIST_INDEX="$DIR/../dist/client/index.html"
+  fi
+fi
+BACKUP_INDEX="${DIST_INDEX}.original"
 
 start_server() {
   echo "🚀 正在启动 Hermes Mobile Watch 伴侣服务..."
@@ -71,7 +94,6 @@ check_status() {
 
 show_qr() {
   NODE_PATH="$NP_DIR" node -e "
-    const QRCode = require('qrcode');
     const os = require('os');
     const ifaces = os.networkInterfaces();
     const candidates = [];
@@ -88,12 +110,21 @@ show_qr() {
                candidates[0] || 'localhost';
     const url = 'http://' + ip + ':8649';
     console.log('==================================================');
-    console.log('📱 手机请连接同一 Wi-Fi，打开微信或系统相机扫码:');
-    QRCode.toString(url, { type: 'terminal', small: true }, (err, text) => {
-      console.log(text);
-      console.log('直达链接: ' + url);
+    console.log('📱 手机请连接同一 Wi-Fi，打开微信/浏览器访问看护地址:');
+    console.log('👉 直达链接: ' + url);
+    try {
+      const QRCode = require('qrcode');
+      QRCode.toString(url, { type: 'terminal', small: true }, (err, text) => {
+        if (!err && text) {
+          console.log('\n📱 手机扫码直达:');
+          console.log(text);
+        }
+        console.log('==================================================');
+      });
+    } catch {
+      console.log('💡 提示: 在手机浏览器直接输入上方直达链接即可访问');
       console.log('==================================================');
-    });
+    }
   "
 }
 

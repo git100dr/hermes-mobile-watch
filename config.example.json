@@ -2,12 +2,12 @@
   "port": 8649,
   "hermesUrl": "http://127.0.0.1:8648",
   "username": "admin",
-  "password": "123456",
-  "ntfyTopic": "hermes-watch-binz",
+  "password": "your_password",
+  "ntfyTopic": "",
   "soundAlert": true,
   "vibrateAlert": true,
   "autoApprove": {
-    "enabled": true,
+    "enabled": false,
     "sessionId": "*"
   }
 }
