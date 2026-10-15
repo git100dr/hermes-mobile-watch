@@ -942,10 +942,10 @@
       .hm-modal {
         background: #15171e !important;
         border: 1px solid rgba(255, 255, 255, 0.16) !important;
-        border-radius: 20px !important;
-        width: 480px !important;
+        border-radius: 18px !important;
+        width: 460px !important;
         max-width: 94vw !important;
-        max-height: 92vh !important;
+        max-height: 88vh !important;
         display: flex !important;
         flex-direction: column !important;
         color: #f8fafc !important;
@@ -955,7 +955,7 @@
         overflow: hidden !important;
       }
       .hm-modal-header {
-        padding: 18px 24px 14px !important;
+        padding: 13px 18px 11px !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
         display: flex !important;
         align-items: center !important;
@@ -964,10 +964,10 @@
       .hm-modal-title-wrap {
         display: flex !important;
         align-items: center !important;
-        gap: 10px !important;
+        gap: 8px !important;
       }
       .hm-modal-title {
-        font-size: 17px !important;
+        font-size: 15.5px !important;
         font-weight: 700 !important;
         color: #f8fafc !important;
       }
@@ -975,10 +975,10 @@
         background: rgba(255, 255, 255, 0.06) !important;
         border: 1px solid rgba(255, 255, 255, 0.12) !important;
         border-radius: 50% !important;
-        width: 30px !important;
-        height: 30px !important;
+        width: 28px !important;
+        height: 28px !important;
         color: #94a3b8 !important;
-        font-size: 18px !important;
+        font-size: 17px !important;
         cursor: pointer !important;
         display: grid !important;
         place-items: center !important;
@@ -992,26 +992,26 @@
 
       .hm-tabs {
         display: flex !important;
-        padding: 6px 20px !important;
+        padding: 4px 14px !important;
         background: rgba(0, 0, 0, 0.25) !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-        gap: 8px !important;
+        gap: 6px !important;
       }
       .hm-tab-btn {
         flex: 1 !important;
-        padding: 8px 12px !important;
+        padding: 6px 10px !important;
         background: transparent !important;
         border: none !important;
-        border-radius: 10px !important;
+        border-radius: 8px !important;
         color: #94a3b8 !important;
-        font-size: 13px !important;
+        font-size: 12.5px !important;
         font-weight: 600 !important;
         cursor: pointer !important;
         transition: all 0.2s !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 6px !important;
+        gap: 5px !important;
       }
       .hm-tab-btn.active {
         background: rgba(255, 255, 255, 0.12) !important;
@@ -1019,39 +1019,40 @@
       }
 
       .hm-modal-content {
-        padding: 18px 24px !important;
+        padding: 12px 16px !important;
         overflow-y: auto !important;
         display: flex !important;
         flex-direction: column !important;
-        gap: 16px !important;
+        gap: 9px !important;
       }
 
       .hm-feature-card {
         background: rgba(255, 255, 255, 0.04) !important;
         border: 1px solid rgba(255, 255, 255, 0.09) !important;
-        border-radius: 14px !important;
-        padding: 14px 16px !important;
+        border-radius: 12px !important;
+        padding: 10px 14px !important;
       }
       .hm-feature-title {
-        font-size: 14px !important;
+        font-size: 13.5px !important;
         font-weight: 600 !important;
         color: #f1f5f9 !important;
         display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
-        margin-bottom: 6px !important;
+        margin-bottom: 2px !important;
       }
       .hm-feature-desc {
-        font-size: 12px !important;
+        font-size: 11.5px !important;
         color: #94a3b8 !important;
-        line-height: 1.5 !important;
-        margin-bottom: 12px !important;
+        line-height: 1.4 !important;
+        margin-bottom: 0px !important;
       }
       .hm-status-badge {
         font-size: 11px !important;
-        padding: 2px 8px !important;
+        padding: 2px 7px !important;
         border-radius: 999px !important;
         font-weight: 600 !important;
+        white-space: nowrap !important;
       }
       .hm-status-granted {
         background: rgba(16, 185, 129, 0.18) !important;
@@ -1068,6 +1069,63 @@
         color: #facc15 !important;
         border: 1px solid rgba(234, 179, 8, 0.3) !important;
       }
+      .hm-status-win {
+        background: rgba(139, 92, 246, 0.18) !important;
+        color: #c4b5fd !important;
+        border: 1px solid rgba(139, 92, 246, 0.3) !important;
+      }
+
+      /* iOS-style Switch Toggle */
+      .hm-switch {
+        position: relative !important;
+        display: inline-block !important;
+        width: 38px !important;
+        height: 22px !important;
+        flex-shrink: 0 !important;
+      }
+      .hm-switch input {
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+      }
+      .hm-switch-slider {
+        position: absolute !important;
+        cursor: pointer !important;
+        inset: 0 !important;
+        background-color: #334155 !important;
+        transition: 0.2s ease !important;
+        border-radius: 22px !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      }
+      .hm-switch-slider:before {
+        position: absolute !important;
+        content: "" !important;
+        height: 16px !important;
+        width: 16px !important;
+        left: 2px !important;
+        bottom: 2px !important;
+        background-color: #f8fafc !important;
+        transition: 0.2s ease !important;
+        border-radius: 50% !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+      }
+      .hm-switch input:checked + .hm-switch-slider {
+        background-color: #2563eb !important;
+        border-color: #3b82f6 !important;
+      }
+      .hm-switch input:checked + .hm-switch-slider:before {
+        transform: translateX(16px) !important;
+      }
+
+      .hm-faq-scroll {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 9px !important;
+        max-height: 420px !important;
+        overflow-y: auto !important;
+        padding-right: 4px !important;
+      }
 
       .hm-btn-row {
         display: flex !important;
@@ -1076,15 +1134,15 @@
       }
       .hm-act-btn {
         flex: 1 !important;
-        padding: 9px 12px !important;
-        border-radius: 10px !important;
-        font-size: 12.5px !important;
+        padding: 7px 11px !important;
+        border-radius: 8px !important;
+        font-size: 12px !important;
         font-weight: 600 !important;
         cursor: pointer !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 6px !important;
+        gap: 5px !important;
         border: none !important;
         transition: all 0.2s !important;
       }
@@ -1459,109 +1517,83 @@
       const perm = ('Notification' in window) ? Notification.permission : 'unsupported';
       let permBadge = '';
       if (perm === 'granted') {
-        permBadge = '<span class="hm-status-badge hm-status-granted">✅ 已开启</span>';
+        permBadge = '<span class="hm-status-badge hm-status-granted">✅ 桌面通知</span>';
       } else if (perm === 'denied') {
-        permBadge = '<span class="hm-status-badge hm-status-denied">🚫 已拒绝 (请在浏览器中允许)</span>';
+        permBadge = '<span class="hm-status-badge hm-status-denied">🚫 通知已拒绝</span>';
       } else {
-        permBadge = '<span class="hm-status-badge hm-status-default">⚠️ 未开启</span>';
+        permBadge = '<span class="hm-status-badge hm-status-default">⚠️ 未开启通知</span>';
       }
 
       const desktopTabHtml = `
-        <div class="hm-feature-card">
-          <div class="hm-feature-title">
-            <span>🖥️ 浏览器桌面通知</span>
-            ${permBadge}
-          </div>
-          <div class="hm-feature-desc">
-            后台或最小化时在屏幕角落弹出横幅，点击直接唤醒本页面。
-          </div>
-          
-          ${perm !== 'granted' ? `
-            <button class="hm-act-btn hm-act-btn-primary" id="hmBtnRequestPerm">
-              <span>🔔 开启桌面通知权限</span>
-            </button>
-          ` : `
-            <div class="hm-btn-row">
-              <button class="hm-act-btn hm-act-btn-success" id="hmBtnTestInstant">
-                <span>⚡ 立即测试</span>
-              </button>
-              <button class="hm-act-btn hm-act-btn-secondary" id="hmBtnTestNotif">
-                <span>⏳ 延时 3s 测试</span>
-              </button>
+        <div class="hm-feature-card" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+          <div style="flex:1;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span style="font-size:13.5px; font-weight:600; color:#f1f5f9;">⚡ 自动审批托管</span>
+              ${autoApproveCurrentSession ? '<span class="hm-status-badge hm-status-granted">已托管</span>' : '<span class="hm-status-badge hm-status-default">未开启</span>'}
             </div>
-          `}
+            <div style="font-size:11.5px; color:#94a3b8; margin-top:2px;">
+              ${autoApproveCurrentSession ? '全会话与子任务毫秒级自动放行，无需确认' : '开启后自动放行所有工具与命令，无需人工确认'}
+            </div>
+          </div>
+          <label class="hm-switch" title="开启/关闭全会话自动放行">
+            <input type="checkbox" id="hmAutoApproveToggle" ${autoApproveCurrentSession ? 'checked' : ''} />
+            <span class="hm-switch-slider"></span>
+          </label>
+        </div>
+
+        <div class="hm-feature-card" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+          <div style="flex:1;">
+            <div style="font-size:13.5px; font-weight:600; color:#f1f5f9;">🔊 提示声音</div>
+            <div style="font-size:11.5px; color:#94a3b8; margin-top:2px;">待审批提示警报音与任务完成音</div>
+          </div>
+          <label class="hm-switch" title="开启/关闭提示音">
+            <input type="checkbox" id="hmSoundToggle" ${soundEnabled ? 'checked' : ''} />
+            <span class="hm-switch-slider"></span>
+          </label>
+        </div>
+
+        <div class="hm-feature-card" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+          <div style="flex:1;">
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+              <span style="font-size:13.5px; font-weight:600; color:#f1f5f9;">🖥️ 桌面通知与系统置顶</span>
+              ${permBadge}
+              <span class="hm-status-badge hm-status-win">✨ 免打扰强弹</span>
+            </div>
+            <div style="font-size:11.5px; color:#94a3b8; margin-top:2px;">
+              ${perm === 'granted' ? '后台最小化横幅与 Windows 底层置顶提醒已就绪' : (perm === 'denied' ? '浏览器通知已拒绝，请在地址栏设置中允许' : '需授权浏览器桌面通知以在后台接收弹窗')}
+            </div>
+          </div>
+          <div style="flex-shrink:0;">
+            ${perm !== 'granted' ? `
+              <button class="hm-act-btn hm-act-btn-primary" id="hmBtnRequestPerm" style="padding:5px 10px; font-size:11.5px; white-space:nowrap;">🔔 开启通知</button>
+            ` : `
+              <button class="hm-link-btn" id="hmGotoTestFaq" style="background:transparent; border:none; color:#38bdf8; font-size:11.5px; cursor:pointer; padding:4px 6px; display:inline-flex; align-items:center; gap:3px; white-space:nowrap; text-decoration:underline;">🧪 测试/诊断 →</button>
+            `}
+          </div>
         </div>
 
         <div class="hm-feature-card">
-          <div class="hm-feature-title">
-            <span>💻 Windows 置顶强弹窗</span>
-            <span class="hm-status-badge hm-status-granted">✨ 免打扰穿透</span>
-          </div>
-          <div class="hm-feature-desc">
-            系统底层直接置顶弹窗，穿透静音、全屏与 Windows 免打扰模式。
-          </div>
-          <button class="hm-act-btn hm-act-btn-win" id="hmBtnTestWinAlert">
-            <span>🚀 测试置顶强弹</span>
-          </button>
-        </div>
-
-        <details class="hm-troubleshoot-details">
-          <summary class="hm-troubleshoot-summary">❓ 听见声音但未见横幅？点击排查</summary>
-          <div class="hm-troubleshoot-content">
-            1. Windows 开启「专注助手/请勿打扰」时，横幅会被收录至右下角通知中心；<br/>
-            2. 可在 Windows【设置 → 系统 → 通知】中确保允许 Chrome 显示横幅；<br/>
-            3. 若横幅被拦截，上方的「Windows 置顶强弹窗」仍会强行置顶提醒。
-          </div>
-        </details>
-
-        <div class="hm-feature-card">
-          <div class="hm-feature-title">
-            <span>⚠️ 待审批任务</span>
-            <span class="hm-status-badge ${activeApprovals.size > 0 ? 'hm-status-default' : 'hm-status-granted'}">
-              ${activeApprovals.size} 项待处理
-            </span>
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span style="font-size:13.5px; font-weight:600; color:#f1f5f9;">⚠️ 待审批任务</span>
+              <span class="hm-status-badge ${activeApprovals.size > 0 ? 'hm-status-default' : 'hm-status-granted'}">
+                ${activeApprovals.size > 0 ? activeApprovals.size + ' 项待处理' : '暂无待处理'}
+              </span>
+            </div>
+            ${activeApprovals.size === 0 ? '<span style="font-size:11px; color:#64748b;">无需操作</span>' : ''}
           </div>
           ${activeApprovals.size > 0 ? `
-            <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+            <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
               ${Array.from(activeApprovals.values()).map(app => `
-                <div style="background:#0e1015; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px; display:flex; align-items:center; justify-content:space-between;">
-                  <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:280px; font-size:12.5px; color:#38bdf8;">
+                <div style="background:#0e1015; border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:7px 10px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                  <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:280px; font-size:12px; color:#38bdf8;">
                     ${escapeHtml(app.command || app.description || '待审批指令')}
                   </div>
-                  <button class="hm-btn hm-btn-allow-once" style="padding:6px 12px; font-size:12px;" onclick="window.__HERMES_OPEN_QUICK_APPROVAL__('${app.approval_id}')">
+                  <button class="hm-btn hm-btn-allow-once" style="padding:4px 10px; font-size:11.5px; white-space:nowrap; flex-shrink:0;" onclick="window.__HERMES_OPEN_QUICK_APPROVAL__('${app.approval_id}')">
                     去审批
                   </button>
                 </div>
               `).join('')}
-            </div>
-          ` : `
-            <div style="font-size:12px; color:#64748b; padding:2px 0;">当前暂无待审批任务</div>
-          `}
-        </div>
-
-        <div class="hm-feature-card" style="display:flex; align-items:center; justify-content:space-between;">
-          <div>
-            <div style="font-size:13.5px; font-weight:600; color:#f1f5f9;">🔊 提示声音</div>
-            <div style="font-size:11.5px; color:#64748b;">审批警报音与任务完成音</div>
-          </div>
-          <input type="checkbox" id="hmSoundToggle" ${soundEnabled ? 'checked' : ''} style="cursor:pointer; width:18px; height:18px;" />
-        </div>
-
-        <div class="hm-feature-card">
-          <div class="hm-feature-title">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span>⚡ 自动审批托管 (全会话免审批)</span>
-              ${autoApproveCurrentSession ? '<span class="hm-status-badge hm-status-granted">✅ 自动放行中</span>' : '<span class="hm-status-badge hm-status-default">未开启</span>'}
-            </div>
-            <input type="checkbox" id="hmAutoApproveToggle" ${autoApproveCurrentSession ? 'checked' : ''} style="cursor:pointer; width:18px; height:18px;" />
-          </div>
-          <div class="hm-feature-desc">
-            开启后，Agent 在执行任何命令或工具时，由看护助手后台毫秒级自动放行，无需人工确认，彻底告别审批弹窗与超时中断。
-          </div>
-          ${autoApproveCurrentSession ? `
-            <div style="margin-top:8px; font-size:12px; color:#38bdf8; background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.2); border-radius:8px; padding:6px 10px; display:flex; align-items:center; justify-content:space-between;">
-              <span>🛡️ 托管范围: <b>全局所有会话与子任务</b></span>
-              <span style="font-size:11px; color:#94a3b8;">自动放行已持久生效</span>
             </div>
           ` : ''}
         </div>
@@ -1590,7 +1622,37 @@
       `;
 
       const faqTabHtml = `
-        <div style="display:flex; flex-direction:column; gap:12px; max-height:420px; overflow-y:auto; padding-right:4px;">
+        <div class="hm-faq-scroll">
+          <div class="hm-feature-card" style="border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.05);">
+            <div style="font-size:13px; font-weight:600; color:#38bdf8; margin-bottom:4px;">🧪 桌面弹窗与通知通道测试</div>
+            <div style="font-size:11.5px; color:#94a3b8; line-height:1.5; margin-bottom:8px;">
+              随时验证浏览器桌面横幅与 Windows 底层置顶强弹提醒通道是否畅通：
+            </div>
+            <div class="hm-btn-row" style="margin-bottom:8px;">
+              <button class="hm-act-btn hm-act-btn-success" id="hmBtnTestInstant">
+                <span>⚡ 立即测试</span>
+              </button>
+              <button class="hm-act-btn hm-act-btn-secondary" id="hmBtnTestNotif">
+                <span>⏳ 延时 3s 测试</span>
+              </button>
+              <button class="hm-act-btn hm-act-btn-win" id="hmBtnTestWinAlert">
+                <span>🚀 测试置顶强弹</span>
+              </button>
+            </div>
+            <div style="font-size:11px; color:#64748b; line-height:1.4;">
+              💡 延时 3s 测试：点击后可在 3 秒内最小化浏览器，检验后台横幅唤醒与点击跳转。
+            </div>
+          </div>
+
+          <div class="hm-feature-card">
+            <div style="font-size:13px; font-weight:600; color:#fbbf24; margin-bottom:4px;">❓ 听见声音但未见横幅？点击排查</div>
+            <div style="font-size:11.5px; color:#94a3b8; line-height:1.6;">
+              1. Windows 开启「专注助手 / 请勿打扰」时，横幅会被收录至右下角通知中心；<br/>
+              2. 可在 Windows【设置 → 系统 → 通知】中确保允许 Chrome 显示横幅；<br/>
+              3. 若横幅被系统拦截，伴侣服务的「Windows 置顶强弹窗」仍会强行置顶提醒。
+            </div>
+          </div>
+
           <div class="hm-feature-card">
             <div style="font-size:13px; font-weight:600; color:#38bdf8; margin-bottom:4px;">🌐 电脑打不开 192.168.x.x:8649，但手机能开？</div>
             <div style="font-size:11.5px; color:#94a3b8; line-height:1.5;">
@@ -1681,6 +1743,13 @@
       const faqTabBtn = overlay.querySelector('#hmTabFaq');
       if (faqTabBtn) {
         faqTabBtn.onclick = () => {
+          activeTab = 'faq';
+          renderModalContent();
+        };
+      }
+      const gotoFaqBtn = overlay.querySelector('#hmGotoTestFaq');
+      if (gotoFaqBtn) {
+        gotoFaqBtn.onclick = () => {
           activeTab = 'faq';
           renderModalContent();
         };
