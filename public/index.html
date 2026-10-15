@@ -1857,95 +1857,50 @@
       overflow-y: auto;
       overscroll-behavior: contain;
     }
-    /* Session History Stream (Inline previous dialogue turns - placed below latest reply) */
+    /* Session History Stream (Earlier dialogue turns in chronological chat order) */
     .session-history-stream {
-      margin-top: 14px;
-      margin-bottom: 6px;
-      border-top: 1px dashed rgba(255, 255, 255, 0.1);
-      padding-top: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
-    .session-history-details {
-      background: rgba(15, 23, 42, 0.55);
-      border: 1px solid rgba(59, 130, 246, 0.25);
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 6px;
-      transition: all 0.2s ease;
+    .load-earlier-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 0 12px 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+      margin-bottom: 4px;
     }
-    .session-history-details[open] {
-      border-color: rgba(59, 130, 246, 0.45);
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
-    }
-    .session-history-summary {
-      background: rgba(30, 41, 59, 0.7);
-      padding: 10px 14px;
-      font-size: 12.5px;
-      font-weight: 600;
+    .load-earlier-btn {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(59, 130, 246, 0.35);
       color: #93c5fd;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 6px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      transition: all 0.2s ease;
       user-select: none;
-      transition: background 0.15s ease;
     }
-    .session-history-summary:hover {
-      background: rgba(30, 41, 59, 0.95);
-      color: #bfdbfe;
-    }
-    .session-history-badge {
-      display: inline-block;
-      background: rgba(59, 130, 246, 0.2);
-      color: #60a5fa;
-      padding: 2px 7px;
-      border-radius: 10px;
-      font-size: 11px;
-      font-weight: 500;
-      margin-left: 6px;
-    }
-    .session-history-toggle-tip {
-      font-size: 11.5px;
-      color: #64748b;
-      font-weight: normal;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .session-history-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 6px 4px 10px 4px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      margin-bottom: 10px;
-    }
-    .stream-tool-btn {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: #cbd5e1;
-      padding: 3px 8px;
-      font-size: 11px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .stream-tool-btn:hover {
+    .load-earlier-btn:hover {
       background: rgba(59, 130, 246, 0.25);
-      border-color: rgba(59, 130, 246, 0.5);
+      border-color: #3b82f6;
       color: #ffffff;
+      transform: translateY(-1px);
     }
-    .session-history-list {
-      padding: 12px;
-      max-height: 580px;
-      overflow-y: auto;
-      overscroll-behavior: contain;
+    .load-earlier-btn:active {
+      transform: translateY(0);
     }
-    .session-history-list::-webkit-scrollbar {
-      width: 5px;
-    }
-    .session-history-list::-webkit-scrollbar-thumb {
-      background: rgba(59, 130, 246, 0.3);
-      border-radius: 4px;
+    .session-history-turns {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
     .stream-turn-card {
       background: rgba(15, 23, 42, 0.65);
@@ -2188,6 +2143,16 @@
         </div>
       </div>
 
+      <!-- Earlier Dialogue Stream (Chronological: Older -> Newer, latest is at the bottom) -->
+      <div class="session-history-stream" id="sessionHistoryStream" style="display: none;">
+        <div class="load-earlier-container" id="loadEarlierContainer" style="display: none;">
+          <button class="load-earlier-btn" id="loadEarlierBtn" type="button" title="点击或向上滑动加载更加以前的记录">
+            <span>⬆️ 查看更早的对话记录 (<span id="loadEarlierCount">0</span> 轮)</span>
+          </button>
+        </div>
+        <div class="session-history-turns" id="sessionHistoryTurns"></div>
+      </div>
+
       <!-- User's Sent Instruction / Prompt Bubble (clamped to 2 lines; tap to expand) -->
       <div class="user-prompt-card clamped" id="userPromptCard" style="display: none;">
         <div class="user-prompt-header">
@@ -2197,7 +2162,7 @@
         <div class="user-prompt-text" id="userPromptText"></div>
       </div>
 
-      <!-- AI Response Content Box -->
+      <!-- AI Response Content Box (At the bottom of dialogue stream) -->
       <div class="ai-response-box">
         <div class="ai-response-header">
           <span>💬 AI 回答</span>
@@ -2210,9 +2175,6 @@
         </div>
         <div class="ai-response-content" id="aiResponseContent">正在加载...</div>
       </div>
-
-      <!-- Inline Session Conversation History (Placed below latest reply, on-demand expandable) -->
-      <div class="session-history-stream" id="sessionHistoryStream" style="display: none;"></div>
     </div>
 
     <!-- 4. Key Event Timeline (collapsed by default; thoughts/deltas filtered out) -->
@@ -3345,7 +3307,10 @@
               }
             }
           }
+          scrollToLatest(false);
         });
+      } else {
+        scrollToLatest(false);
       }
     }
 
@@ -3874,7 +3839,12 @@
     }
 
     let streamTurnsCache = [];
-    let streamHistorySortOrder = 'desc'; // 'desc' = newest earlier turn first, 'asc' = oldest first
+    let streamVisibleEarlierCount = 1; // Default: show the 1 most recent prior turn; older turns loaded at top
+
+    const loadEarlierContainer = document.getElementById('loadEarlierContainer');
+    const loadEarlierBtn = document.getElementById('loadEarlierBtn');
+    const loadEarlierCount = document.getElementById('loadEarlierCount');
+    const sessionHistoryTurns = document.getElementById('sessionHistoryTurns');
 
     function groupMessagesIntoTurns(messages) {
       const turns = [];
@@ -3899,159 +3869,164 @@
       return turns;
     }
 
+    function scrollToLatest(smooth = false) {
+      setTimeout(() => {
+        const aiBox = document.querySelector('.ai-response-box') || document.getElementById('userPromptCard');
+        if (aiBox) {
+          aiBox.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'end' });
+        }
+      }, 60);
+    }
+
     function renderSessionHistoryStream(messages) {
-      if (!sessionHistoryStream) return;
+      if (!sessionHistoryStream || !sessionHistoryTurns) return;
       if (!messages || messages.length <= 1) {
         sessionHistoryStream.style.display = 'none';
-        sessionHistoryStream.innerHTML = '';
+        sessionHistoryTurns.innerHTML = '';
+        if (loadEarlierContainer) loadEarlierContainer.style.display = 'none';
         return;
       }
 
       const turns = groupMessagesIntoTurns(messages);
-      // If there is only 1 turn, it is already shown in userPromptCard & aiResponseBox
+      // If only 1 turn, it is the latest turn shown in userPromptCard & aiResponseBox
       if (turns.length <= 1) {
         sessionHistoryStream.style.display = 'none';
-        sessionHistoryStream.innerHTML = '';
+        sessionHistoryTurns.innerHTML = '';
+        if (loadEarlierContainer) loadEarlierContainer.style.display = 'none';
         return;
       }
 
-      // Prior turns are all turns before the latest turn
+      // Prior turns are all turns before the latest turn (chronological: Turn 1, Turn 2, ... Turn N-1)
       const priorTurns = turns.slice(0, turns.length - 1);
       if (priorTurns.length === 0) {
         sessionHistoryStream.style.display = 'none';
-        sessionHistoryStream.innerHTML = '';
+        sessionHistoryTurns.innerHTML = '';
+        if (loadEarlierContainer) loadEarlierContainer.style.display = 'none';
         return;
       }
 
       streamTurnsCache = priorTurns;
-      renderPriorTurnsContent();
-      sessionHistoryStream.style.display = 'block';
+      // Default: show the last 1 prior turn (or all if total <= 1)
+      streamVisibleEarlierCount = 1;
+      renderTurnsSlice();
+      sessionHistoryStream.style.display = 'flex';
     }
 
-    function renderPriorTurnsContent() {
-      if (!sessionHistoryStream || streamTurnsCache.length === 0) return;
+    function renderSingleTurnHtml(turn, turnNum) {
+      const userMsg = turn.user;
+      const userContent = userMsg ? extractMessageText(userMsg.content) : '';
+      const userTime = userMsg?.timestamp ? new Date(userMsg.timestamp * (userMsg.timestamp > 1e11 ? 1 : 1000)).toLocaleTimeString() : '';
 
-      const priorTurns = streamTurnsCache;
-      // Index them 1-based (Turn 1, Turn 2, ...)
-      const turnsWithIndex = priorTurns.map((turn, i) => ({ ...turn, turnNum: i + 1 }));
-
-      // Order: if 'desc', reverse so Turn N-1 is first, down to Turn 1
-      const displayedTurns = streamHistorySortOrder === 'desc'
-        ? [...turnsWithIndex].reverse()
-        : [...turnsWithIndex];
-
-      // Keep user's expanded state if already toggled open
-      const existingDetails = document.getElementById('sessionHistoryDetails');
-      const wasOpen = existingDetails ? existingDetails.open : false;
-
-      let html = `
-        <details class="session-history-details" id="sessionHistoryDetails" ${wasOpen ? 'open' : ''}>
-          <summary class="session-history-summary">
-            <span>📜 查看更早的对话记录 <span class="session-history-badge">${priorTurns.length} 轮前序对话</span></span>
-            <span class="session-history-toggle-tip">向下滑动按需展开 ▾</span>
-          </summary>
-          <div class="session-history-list">
-            <div class="session-history-toolbar">
-              <span style="font-size: 11.5px; color: #94a3b8;">本轮会话前序共 ${priorTurns.length} 轮对话</span>
-              <div style="display: flex; gap: 6px; align-items: center;">
-                <button class="stream-tool-btn" id="streamSortBtn" onclick="window.toggleStreamHistorySort(event)">
-                  ${streamHistorySortOrder === 'desc' ? '⏱️ 倒序 (最新在前)' : '⏱️ 正序 (最早在前)'}
-                </button>
-                <button class="stream-tool-btn" onclick="window.collapseSessionHistory(event)">✕ 收起</button>
-              </div>
-            </div>
-      `;
-
-      displayedTurns.forEach((turn) => {
-        const turnNum = turn.turnNum;
-        const userMsg = turn.user;
-        const userContent = userMsg ? extractMessageText(userMsg.content) : '';
-        const userTime = userMsg?.timestamp ? new Date(userMsg.timestamp * (userMsg.timestamp > 1e11 ? 1 : 1000)).toLocaleTimeString() : '';
-
-        // Combine assistant messages in this turn
-        const asstMsgs = (turn.assistants || []).filter(a => {
-          const t = extractMessageText(a.content);
-          return (t && t.trim().length > 0) || (a.reasoning && a.reasoning.trim().length > 0);
-        });
-
-        let asstText = asstMsgs.map(a => extractMessageText(a.content)).filter(Boolean).join('\n\n');
-        let asstThought = asstMsgs.map(a => (a.reasoning || '').trim()).filter(Boolean).join('\n\n');
-        const asstTime = asstMsgs[asstMsgs.length - 1]?.timestamp 
-          ? new Date(asstMsgs[asstMsgs.length - 1].timestamp * (asstMsgs[asstMsgs.length - 1].timestamp > 1e11 ? 1 : 1000)).toLocaleTimeString()
-          : '';
-
-        let thoughtHtml = '';
-        if (asstThought) {
-          thoughtHtml = `
-            <details class="formal-thought-collapse" style="margin-bottom: 8px;">
-              <summary class="formal-thought-summary">
-                <span>💡 思考过程 (${asstThought.length} 字)</span>
-                <span style="font-size:11px; opacity:0.8;">点击展开</span>
-              </summary>
-              <div class="formal-thought-body">${escapeHtml(asstThought)}</div>
-            </details>
-          `;
-        }
-
-        let renderedAiHtml = '';
-        if (asstText) {
-          try {
-            renderedAiHtml = renderMarkdown(asstText);
-          } catch {
-            renderedAiHtml = `<pre style="white-space: pre-wrap;">${escapeHtml(asstText)}</pre>`;
-          }
-        } else {
-          renderedAiHtml = '<div style="color: #64748b; font-size: 13px;">(无文字输出)</div>';
-        }
-
-        html += `
-          <div class="stream-turn-card">
-            <div class="stream-turn-header">
-              <span class="stream-turn-badge">🔹 第 ${turnNum} 轮对话</span>
-              <span class="stream-turn-time">${userTime || asstTime || ''}</span>
-            </div>
-            ${userContent ? `
-              <div class="stream-turn-user">
-                <div class="stream-turn-user-label">
-                  <span>👤 用户提问</span>
-                  <button class="stream-msg-copy-btn" onclick="window.copyTurnText(this, ${turnNum - 1}, 'user')">📋 复制</button>
-                </div>
-                <div class="stream-turn-user-text">${escapeHtml(userContent)}</div>
-              </div>
-            ` : ''}
-            <div class="stream-turn-ai">
-              <div class="stream-turn-ai-label">
-                <span>🤖 AI 回答</span>
-                <button class="stream-msg-copy-btn" onclick="window.copyTurnText(this, ${turnNum - 1}, 'ai')">📋 复制回复</button>
-              </div>
-              <div class="stream-turn-ai-body">
-                ${thoughtHtml}
-                ${renderedAiHtml}
-              </div>
-            </div>
-          </div>
-        `;
+      const asstMsgs = (turn.assistants || []).filter(a => {
+        const t = extractMessageText(a.content);
+        return (t && t.trim().length > 0) || (a.reasoning && a.reasoning.trim().length > 0);
       });
 
-      html += `
-          </div>
-        </details>
-      `;
+      let asstText = asstMsgs.map(a => extractMessageText(a.content)).filter(Boolean).join('\n\n');
+      let asstThought = asstMsgs.map(a => (a.reasoning || '').trim()).filter(Boolean).join('\n\n');
+      const asstTime = asstMsgs[asstMsgs.length - 1]?.timestamp 
+        ? new Date(asstMsgs[asstMsgs.length - 1].timestamp * (asstMsgs[asstMsgs.length - 1].timestamp > 1e11 ? 1 : 1000)).toLocaleTimeString()
+        : '';
 
-      sessionHistoryStream.innerHTML = html;
+      let thoughtHtml = '';
+      if (asstThought) {
+        thoughtHtml = `
+          <details class="formal-thought-collapse" style="margin-bottom: 8px;">
+            <summary class="formal-thought-summary">
+              <span>💡 思考过程 (${asstThought.length} 字)</span>
+              <span style="font-size:11px; opacity:0.8;">点击展开</span>
+            </summary>
+            <div class="formal-thought-body">${escapeHtml(asstThought)}</div>
+          </details>
+        `;
+      }
+
+      let renderedAiHtml = '';
+      if (asstText) {
+        try {
+          renderedAiHtml = renderMarkdown(asstText);
+        } catch {
+          renderedAiHtml = `<pre style="white-space: pre-wrap;">${escapeHtml(asstText)}</pre>`;
+        }
+      } else {
+        renderedAiHtml = '<div style="color: #64748b; font-size: 13px;">(无文字输出)</div>';
+      }
+
+      return `
+        <div class="stream-turn-card" id="stream_turn_${turnNum}">
+          <div class="stream-turn-header">
+            <span class="stream-turn-badge">🔹 第 ${turnNum} 轮对话</span>
+            <span class="stream-turn-time">${userTime || asstTime || ''}</span>
+          </div>
+          ${userContent ? `
+            <div class="stream-turn-user">
+              <div class="stream-turn-user-label">
+                <span>👤 用户提问</span>
+                <button class="stream-msg-copy-btn" onclick="window.copyTurnText(this, ${turnNum - 1}, 'user')">📋 复制</button>
+              </div>
+              <div class="stream-turn-user-text">${escapeHtml(userContent)}</div>
+            </div>
+          ` : ''}
+          <div class="stream-turn-ai">
+            <div class="stream-turn-ai-label">
+              <span>🤖 AI 回答</span>
+              <button class="stream-msg-copy-btn" onclick="window.copyTurnText(this, ${turnNum - 1}, 'ai')">📋 复制回复</button>
+            </div>
+            <div class="stream-turn-ai-body">
+              ${thoughtHtml}
+              ${renderedAiHtml}
+            </div>
+          </div>
+        </div>
+      `;
     }
 
-    window.toggleStreamHistorySort = function(e) {
-      if (e) e.stopPropagation();
-      streamHistorySortOrder = streamHistorySortOrder === 'desc' ? 'asc' : 'desc';
-      renderPriorTurnsContent();
+    function renderTurnsSlice() {
+      if (!sessionHistoryTurns) return;
+      const priorTurns = streamTurnsCache;
+      const total = priorTurns.length;
+      const visibleCount = Math.min(total, streamVisibleEarlierCount);
+      const startIndex = total - visibleCount;
+
+      // Slice the visible turns in chronological order (startIndex to total - 1)
+      const visibleTurns = priorTurns.slice(startIndex);
+      const html = visibleTurns.map((turn, i) => renderSingleTurnHtml(turn, startIndex + i + 1)).join('');
+      sessionHistoryTurns.innerHTML = html;
+
+      const remainingOlder = startIndex;
+      if (loadEarlierContainer) {
+        if (remainingOlder > 0) {
+          loadEarlierContainer.style.display = 'flex';
+          if (loadEarlierCount) loadEarlierCount.textContent = remainingOlder;
+        } else {
+          loadEarlierContainer.style.display = 'none';
+        }
+      }
+    }
+
+    window.loadMoreEarlierTurns = function() {
+      if (!sessionHistoryTurns) return;
+      const priorTurns = streamTurnsCache;
+      const total = priorTurns.length;
+      if (streamVisibleEarlierCount >= total) return;
+
+      const oldScrollHeight = document.documentElement.scrollHeight;
+      const oldScrollTop = window.scrollY || document.documentElement.scrollTop;
+
+      // Load older batch (3 at a time or all)
+      streamVisibleEarlierCount = Math.min(total, streamVisibleEarlierCount + 3);
+      renderTurnsSlice();
+
+      // Seamless scroll position preservation so reading isn't interrupted
+      requestAnimationFrame(() => {
+        const newScrollHeight = document.documentElement.scrollHeight;
+        window.scrollTo({ top: oldScrollTop + (newScrollHeight - oldScrollHeight), behavior: 'auto' });
+      });
     };
 
-    window.collapseSessionHistory = function(e) {
-      if (e) e.stopPropagation();
-      const details = document.getElementById('sessionHistoryDetails');
-      if (details) details.open = false;
-    };
+    if (loadEarlierBtn) {
+      loadEarlierBtn.addEventListener('click', window.loadMoreEarlierTurns);
+    }
 
     window.copyTurnText = function(btn, turnIndex, type) {
       const turn = streamTurnsCache[turnIndex];
@@ -4218,6 +4193,7 @@
       if (activeItem?.thought) {
         appendStreamingThought(activeItem.thought);
       }
+      scrollToLatest(false);
     }
 
     async function fetchSessionDetails(sid, title) {
@@ -4281,6 +4257,7 @@
               if (usageCompactText) {
                 usageCompactText.textContent = `💬 会话记录 · 共 ${msgs.length} 条消息`;
               }
+              scrollToLatest(false);
               return;
             }
           }
@@ -4291,6 +4268,7 @@
       currentAiOutput = '（该会话暂无执行结果）';
       currentAiThought = '';
       renderAiText('');
+      scrollToLatest(false);
       if (completionTimeText) completionTimeText.textContent = '暂无记录';
     }
 
@@ -4470,12 +4448,7 @@
       }
 
       // Smoothly bring response into view
-      setTimeout(() => {
-        const targetView = document.getElementById('userPromptCard') || document.getElementById('completionCard');
-        if (targetView) {
-          targetView.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      }, 120);
+      scrollToLatest(true);
 
       try {
         const res = await fetch('/api/chat/send', {
