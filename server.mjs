@@ -58,6 +58,58 @@ function saveConfig() {
 // Database Path
 const DB_PATH = process.env.HERMES_DB_PATH || path.resolve(__dirname, '..', 'hermes-web-ui.db')
 
+// Auto-inject Companion Widget into Hermes Web UI client index.html
+function ensureWidgetInjected() {
+  try {
+    const homedir = os.homedir()
+    const candidates = new Set()
+
+    const npxDir = path.join(homedir, '.npm', '_npx')
+    if (fs.existsSync(npxDir)) {
+      const hashes = fs.readdirSync(npxDir)
+      for (const h of hashes) {
+        const candidate = path.join(npxDir, h, 'node_modules', 'hermes-web-ui', 'dist', 'client', 'index.html')
+        if (fs.existsSync(candidate)) {
+          candidates.add(candidate)
+        }
+      }
+    }
+
+    const siblingDist = path.resolve(__dirname, '..', 'dist', 'client', 'index.html')
+    if (fs.existsSync(siblingDist)) {
+      candidates.add(siblingDist)
+    }
+
+    const widgetPath = path.join(__dirname, 'public', 'companion-widget.js')
+    if (!fs.existsSync(widgetPath)) return
+    const widgetCode = fs.readFileSync(widgetPath, 'utf8')
+    const markerStart = '<!-- HERMES_WATCH_WIDGET_START -->'
+    const markerEnd = '<!-- HERMES_WATCH_WIDGET_END -->'
+    const widgetBlock = markerStart + '\n<script>\n' + widgetCode + '\n</script>\n' + markerEnd
+
+    for (const target of candidates) {
+      try {
+        let html = fs.readFileSync(target, 'utf8')
+        if (!html.includes(markerStart)) {
+          const backup = target + '.original'
+          if (!fs.existsSync(backup)) {
+            fs.writeFileSync(backup, html, 'utf8')
+          }
+          html = html.replace('</body>', widgetBlock + '\n</body>')
+          fs.writeFileSync(target, html, 'utf8')
+          console.log(`[Widget] Auto-injected companion widget into: ${target}`)
+        }
+      } catch (e) {
+        console.warn(`[Widget] Failed to inject into ${target}:`, e.message)
+      }
+    }
+  } catch (err) {
+    console.warn('[Widget] Auto-injection check failed:', err.message)
+  }
+}
+
+ensureWidgetInjected()
+
 function formatTokens(num) {
   if (num == null) return '0'
   const n = Number(num)

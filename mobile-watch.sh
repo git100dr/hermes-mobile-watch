@@ -15,26 +15,53 @@ if [ -z "$NP_DIR" ] || [ ! -d "$NP_DIR" ]; then
   done
 fi
 
-# Detect hermes-web-ui dist/client/index.html location (for optional PC widget injection)
-DIST_INDEX="${HERMES_WEB_UI_INDEX:-}"
-if [ -z "$DIST_INDEX" ] || [ ! -f "$DIST_INDEX" ]; then
-  if [ -d "$HOME/.npm/_npx" ]; then
-    DIST_INDEX=$(find "$HOME/.npm/_npx" -name "index.html" -path "*/hermes-web-ui/dist/client/index.html" 2>/dev/null | head -n 1 || true)
-  fi
-  if [ -z "$DIST_INDEX" ]; then
-    GLOBAL_NPM=$(npm root -g 2>/dev/null || true)
-    if [ -n "$GLOBAL_NPM" ] && [ -f "$GLOBAL_NPM/hermes-web-ui/dist/client/index.html" ]; then
-      DIST_INDEX="$GLOBAL_NPM/hermes-web-ui/dist/client/index.html"
+# Detect hermes-web-ui dist/client/index.html locations
+get_client_index_paths() {
+  local paths=()
+  # 1. Inspect running hermes-web-ui process (highest priority)
+  local proc_path
+  proc_path=$(ps aux 2>/dev/null | grep -v grep | grep 'hermes-web-ui/dist/server/index.js' | head -n 1 | awk '{for(i=1;i<=NF;i++) if($i ~ /hermes-web-ui\/dist\/server\/index\.js/) print $i}')
+  if [ -n "$proc_path" ]; then
+    local client_index="${proc_path/dist\/server\/index.js/dist\/client\/index.html}"
+    if [ -f "$client_index" ]; then
+      paths+=("$client_index")
     fi
   fi
-  if [ -z "$DIST_INDEX" ] && [ -f "$DIR/../dist/client/index.html" ]; then
-    DIST_INDEX="$DIR/../dist/client/index.html"
+
+  # 2. From environment variable HERMES_WEB_UI_INDEX
+  if [ -n "${HERMES_WEB_UI_INDEX:-}" ] && [ -f "$HERMES_WEB_UI_INDEX" ]; then
+    paths+=("$HERMES_WEB_UI_INDEX")
   fi
-fi
-BACKUP_INDEX="${DIST_INDEX}.original"
+
+  # 3. All matching dist/client/index.html in ~/.npm/_npx
+  if [ -d "$HOME/.npm/_npx" ]; then
+    while IFS= read -r f; do
+      [ -n "$f" ] && [ -f "$f" ] && paths+=("$f")
+    done < <(find "$HOME/.npm/_npx" -name "index.html" -path "*/hermes-web-ui/dist/client/index.html" 2>/dev/null)
+  fi
+
+  # 4. Global npm root
+  local global_npm
+  global_npm=$(npm root -g 2>/dev/null || true)
+  if [ -n "$global_npm" ] && [ -f "$global_npm/hermes-web-ui/dist/client/index.html" ]; then
+    paths+=("$global_npm/hermes-web-ui/dist/client/index.html")
+  fi
+
+  # 5. Local repo dist
+  if [ -f "$DIR/../dist/client/index.html" ]; then
+    paths+=("$DIR/../dist/client/index.html")
+  fi
+
+  if [ ${#paths[@]} -gt 0 ]; then
+    printf '%s\n' "${paths[@]}" | sort -u
+  fi
+}
 
 start_server() {
   echo "🚀 正在启动 Hermes Mobile Watch 伴侣服务..."
+  # Auto-inject companion widget into Hermes Web UI
+  install_widget >/dev/null 2>&1 || true
+
   if systemctl --user start hermes-mobile-watch 2>/dev/null; then
     :
   else
@@ -129,57 +156,66 @@ show_qr() {
 }
 
 install_widget() {
-  if [ ! -f "$DIST_INDEX" ]; then
-    echo "⚠️ 未找到 $DIST_INDEX，跳过自动注入"
+  local target_paths
+  mapfile -t target_paths < <(get_client_index_paths)
+  if [ ${#target_paths[@]} -eq 0 ] || [ -z "${target_paths[0]:-}" ]; then
+    echo "⚠️ 未找到 hermes-web-ui 的 index.html，跳过挂件注入"
     return 0
   fi
 
-  if [ -f "$BACKUP_INDEX" ]; then
-    # Always restore from pristine backup first to guarantee clean structure!
-    cp "$BACKUP_INDEX" "$DIST_INDEX"
-  else
-    cp "$DIST_INDEX" "$BACKUP_INDEX"
-    echo "📦 已备份原始 PC 页面至: $BACKUP_INDEX"
-  fi
+  for target in "${target_paths[@]}"; do
+    [ -n "$target" ] && [ -f "$target" ] || continue
+    local backup="${target}.original"
+    if [ -f "$backup" ]; then
+      cp "$backup" "$target"
+    else
+      cp "$target" "$backup"
+      echo "📦 已备份原始 PC 页面至: $backup"
+    fi
 
-  node -e "
-    const fs = require('fs');
-    const path = '$DIST_INDEX';
-    const widgetCode = fs.readFileSync('$DIR/public/companion-widget.js', 'utf8');
-    let html = fs.readFileSync(path, 'utf8');
-    const markerStart = '<!-- HERMES_WATCH_WIDGET_START -->';
-    const markerEnd = '<!-- HERMES_WATCH_WIDGET_END -->';
-    const widgetBlock = markerStart + '\n<script>\n' + widgetCode + '\n</script>\n' + markerEnd;
-    
-    if (html.includes(markerStart)) {
-      const regex = /<!-- HERMES_WATCH_WIDGET_START -->[\s\S]*?<!-- HERMES_WATCH_WIDGET_END -->/;
-      html = html.replace(regex, widgetBlock);
-    } else {
-      html = html.replace('</body>', widgetBlock + '\n</body>');
-    }
-    fs.writeFileSync(path, html, 'utf8');
-  "
-  echo "✅ 已成功将手机与桌面看护挂件注入到 PC Web 界面!"
+    node -e "
+      const fs = require('fs');
+      const target = process.argv[1];
+      const widgetCode = fs.readFileSync('$DIR/public/companion-widget.js', 'utf8');
+      let html = fs.readFileSync(target, 'utf8');
+      const markerStart = '<!-- HERMES_WATCH_WIDGET_START -->';
+      const markerEnd = '<!-- HERMES_WATCH_WIDGET_END -->';
+      const widgetBlock = markerStart + '\n<script>\n' + widgetCode + '\n</script>\n' + markerEnd;
+      
+      if (html.includes(markerStart)) {
+        const regex = /<!-- HERMES_WATCH_WIDGET_START -->[\s\S]*?<!-- HERMES_WATCH_WIDGET_END -->/;
+        html = html.replace(regex, widgetBlock);
+      } else {
+        html = html.replace('</body>', widgetBlock + '\n</body>');
+      }
+      fs.writeFileSync(target, html, 'utf8');
+    " "$target"
+    echo "✅ 已成功将手机与桌面看护挂件注入到: $target"
+  done
   echo "💡 刷新电脑浏览器 http://localhost:8648 即可生效"
 }
 
 uninstall_widget() {
-  if [ -f "$BACKUP_INDEX" ]; then
-    cp "$BACKUP_INDEX" "$DIST_INDEX"
-    echo "✅ 已成功从备份恢复 PC 页面，挂件已卸载"
-  else
-    if [ -f "$DIST_INDEX" ]; then
+  local target_paths
+  mapfile -t target_paths < <(get_client_index_paths)
+  for target in "${target_paths[@]}"; do
+    [ -n "$target" ] && [ -f "$target" ] || continue
+    local backup="${target}.original"
+    if [ -f "$backup" ]; then
+      cp "$backup" "$target"
+      echo "✅ 已成功从备份恢复 PC 页面: $target"
+    elif [ -f "$target" ]; then
       node -e "
         const fs = require('fs');
-        const path = '$DIST_INDEX';
-        let html = fs.readFileSync(path, 'utf8');
+        const target = process.argv[1];
+        let html = fs.readFileSync(target, 'utf8');
         const regex = /<!-- HERMES_WATCH_WIDGET_START -->[\s\S]*?<!-- HERMES_WATCH_WIDGET_END -->/;
         html = html.replace(regex, '');
-        fs.writeFileSync(path, html, 'utf8');
-      "
-      echo "✅ 已移除挂件脚本"
+        fs.writeFileSync(target, html, 'utf8');
+      " "$target"
+      echo "✅ 已移除挂件脚本: $target"
     fi
-  fi
+  done
 }
 
 case "$1" in
