@@ -1857,21 +1857,29 @@
       overflow-y: auto;
       overscroll-behavior: contain;
     }
-    /* Session History Stream (Inline previous dialogue turns) */
+    /* Session History Stream (Inline previous dialogue turns - placed below latest reply) */
     .session-history-stream {
-      margin-bottom: 12px;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+      padding-top: 12px;
     }
     .session-history-details {
-      background: rgba(15, 23, 42, 0.45);
-      border: 1px solid rgba(59, 130, 246, 0.22);
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(59, 130, 246, 0.25);
       border-radius: 12px;
       overflow: hidden;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
+      transition: all 0.2s ease;
+    }
+    .session-history-details[open] {
+      border-color: rgba(59, 130, 246, 0.45);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
     }
     .session-history-summary {
-      background: rgba(30, 41, 59, 0.65);
-      padding: 8px 12px;
-      font-size: 12px;
+      background: rgba(30, 41, 59, 0.7);
+      padding: 10px 14px;
+      font-size: 12.5px;
       font-weight: 600;
       color: #93c5fd;
       cursor: pointer;
@@ -1882,55 +1890,168 @@
       transition: background 0.15s ease;
     }
     .session-history-summary:hover {
-      background: rgba(30, 41, 59, 0.9);
+      background: rgba(30, 41, 59, 0.95);
+      color: #bfdbfe;
+    }
+    .session-history-badge {
+      display: inline-block;
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 500;
+      margin-left: 6px;
     }
     .session-history-toggle-tip {
-      font-size: 11px;
+      font-size: 11.5px;
       color: #64748b;
       font-weight: normal;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .session-history-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 4px 10px 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 10px;
+    }
+    .stream-tool-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      padding: 3px 8px;
+      font-size: 11px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .stream-tool-btn:hover {
+      background: rgba(59, 130, 246, 0.25);
+      border-color: rgba(59, 130, 246, 0.5);
+      color: #ffffff;
     }
     .session-history-list {
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      padding: 12px;
+      max-height: 580px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
     }
-    .stream-msg-card {
-      border-radius: 10px;
-      padding: 10px 12px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    .session-history-list::-webkit-scrollbar {
+      width: 5px;
     }
-    .stream-msg-card.user {
-      background: rgba(37, 99, 235, 0.08);
-      border: 1px solid rgba(59, 130, 246, 0.25);
+    .session-history-list::-webkit-scrollbar-thumb {
+      background: rgba(59, 130, 246, 0.3);
+      border-radius: 4px;
     }
-    .stream-msg-card.assistant {
+    .stream-turn-card {
       background: rgba(15, 23, 42, 0.65);
       border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
     }
-    .stream-msg-header {
+    .stream-turn-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .stream-turn-badge {
       font-size: 11.5px;
-      font-weight: 600;
-      margin-bottom: 6px;
+      font-weight: 700;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid rgba(56, 189, 248, 0.25);
     }
-    .stream-msg-card.user .stream-msg-header {
-      color: #93c5fd;
-    }
-    .stream-msg-card.assistant .stream-msg-header {
-      color: #34d399;
-    }
-    .stream-msg-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .stream-msg-time {
+    .stream-turn-time {
       font-size: 11px;
       color: #64748b;
-      font-weight: normal;
+    }
+    .stream-turn-user {
+      background: rgba(37, 99, 235, 0.07);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+    }
+    .stream-turn-user-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #93c5fd;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stream-turn-user-text {
+      font-size: 13.5px;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      line-height: 1.55;
+    }
+    .stream-turn-ai {
+      background: rgba(15, 23, 42, 0.4);
+      border-radius: 8px;
+      padding: 4px 6px;
+    }
+    .stream-turn-ai-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #34d399;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stream-turn-ai-body {
+      font-size: 14px;
+      line-height: 1.65;
+      color: #e2e8f0;
+      word-break: break-word;
+    }
+    .stream-turn-ai-body pre {
+      background: #090d16;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px 10px;
+      overflow-x: auto;
+      margin: 8px 0;
+    }
+    .stream-turn-ai-body code {
+      font-size: 12.5px;
+    }
+    .stream-turn-ai-body table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 8px 0;
+      font-size: 12.5px;
+    }
+    .stream-turn-ai-body th, .stream-turn-ai-body td {
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 6px 10px;
+    }
+    .stream-turn-ai-body th {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .stream-turn-ai-body ul, .stream-turn-ai-body ol {
+      padding-left: 20px;
+      margin: 6px 0;
+    }
+    .stream-turn-ai-body p {
+      margin: 6px 0;
+    }
+    .stream-turn-ai-body h1, .stream-turn-ai-body h2, .stream-turn-ai-body h3 {
+      margin: 10px 0 6px 0;
+      color: #f1f5f9;
     }
     .stream-msg-copy-btn {
       background: rgba(255, 255, 255, 0.06);
@@ -1946,58 +2067,6 @@
       background: rgba(59, 130, 246, 0.25);
       border-color: rgba(59, 130, 246, 0.5);
       color: #ffffff;
-    }
-    .stream-msg-body {
-      font-size: 14px;
-      line-height: 1.65;
-      color: #e2e8f0;
-      word-break: break-word;
-    }
-    .stream-msg-body pre {
-      background: #090d16;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
-      padding: 8px 10px;
-      overflow-x: auto;
-      margin: 8px 0;
-    }
-    .stream-msg-body code {
-      font-size: 12.5px;
-    }
-    .stream-msg-body table {
-      border-collapse: collapse;
-      width: 100%;
-      margin: 8px 0;
-      font-size: 12.5px;
-    }
-    .stream-msg-body th, .stream-msg-body td {
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 6px 10px;
-    }
-    .stream-msg-body th {
-      background: rgba(255, 255, 255, 0.06);
-    }
-    .stream-msg-body ul, .stream-msg-body ol {
-      padding-left: 20px;
-      margin: 6px 0;
-    }
-    .stream-msg-body p {
-      margin: 6px 0;
-    }
-    .stream-msg-body h1, .stream-msg-body h2, .stream-msg-body h3 {
-      margin: 10px 0 6px 0;
-      color: #f1f5f9;
-    }
-    .session-history-divider {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 6px 0;
-      font-size: 11px;
-      color: #64748b;
-      border-top: 1px dashed rgba(255, 255, 255, 0.08);
-      background: rgba(15, 23, 42, 0.3);
-      user-select: none;
     }
   </style>
 </head>
@@ -2119,9 +2188,6 @@
         </div>
       </div>
 
-      <!-- Inline Session Conversation Stream (for earlier turns in this session) -->
-      <div class="session-history-stream" id="sessionHistoryStream" style="display: none;"></div>
-
       <!-- User's Sent Instruction / Prompt Bubble (clamped to 2 lines; tap to expand) -->
       <div class="user-prompt-card clamped" id="userPromptCard" style="display: none;">
         <div class="user-prompt-header">
@@ -2144,6 +2210,9 @@
         </div>
         <div class="ai-response-content" id="aiResponseContent">正在加载...</div>
       </div>
+
+      <!-- Inline Session Conversation History (Placed below latest reply, on-demand expandable) -->
+      <div class="session-history-stream" id="sessionHistoryStream" style="display: none;"></div>
     </div>
 
     <!-- 4. Key Event Timeline (collapsed by default; thoughts/deltas filtered out) -->
@@ -3804,6 +3873,32 @@
       return content;
     }
 
+    let streamTurnsCache = [];
+    let streamHistorySortOrder = 'desc'; // 'desc' = newest earlier turn first, 'asc' = oldest first
+
+    function groupMessagesIntoTurns(messages) {
+      const turns = [];
+      let currentTurn = null;
+
+      for (const m of messages) {
+        if (m.role === 'user') {
+          if (currentTurn) {
+            turns.push(currentTurn);
+          }
+          currentTurn = { user: m, assistants: [] };
+        } else if (m.role === 'assistant') {
+          if (!currentTurn) {
+            currentTurn = { user: null, assistants: [] };
+          }
+          currentTurn.assistants.push(m);
+        }
+      }
+      if (currentTurn) {
+        turns.push(currentTurn);
+      }
+      return turns;
+    }
+
     function renderSessionHistoryStream(messages) {
       if (!sessionHistoryStream) return;
       if (!messages || messages.length <= 1) {
@@ -3812,110 +3907,169 @@
         return;
       }
 
-      let lastUserIdx = -1;
-      let lastAsstIdx = -1;
-
-      for (let i = messages.length - 1; i >= 0; i--) {
-        if (lastAsstIdx === -1 && messages[i].role === 'assistant') {
-          lastAsstIdx = i;
-        }
-        if (lastUserIdx === -1 && messages[i].role === 'user') {
-          lastUserIdx = i;
-        }
-        if (lastUserIdx !== -1 && lastAsstIdx !== -1) break;
-      }
-
-      const isRunning = isStreaming || activeSessionsMap.has(currentActiveSessionId);
-      let prevMessages = [];
-      if (isRunning) {
-        const cutIdx = lastUserIdx !== -1 ? lastUserIdx : messages.length;
-        prevMessages = messages.slice(0, cutIdx);
-      } else {
-        const cutIdx = lastUserIdx !== -1 ? lastUserIdx : (lastAsstIdx !== -1 ? lastAsstIdx : messages.length - 1);
-        prevMessages = messages.slice(0, cutIdx);
-      }
-
-      // Filter out empty placeholder or non-content messages
-      prevMessages = prevMessages.filter(m => {
-        const text = extractMessageText(m.content);
-        return (text && text.trim().length > 0) || (m.reasoning && m.reasoning.trim().length > 0);
-      });
-
-      if (prevMessages.length === 0) {
+      const turns = groupMessagesIntoTurns(messages);
+      // If there is only 1 turn, it is already shown in userPromptCard & aiResponseBox
+      if (turns.length <= 1) {
         sessionHistoryStream.style.display = 'none';
         sessionHistoryStream.innerHTML = '';
         return;
       }
 
-      streamHistoryCache = prevMessages;
+      // Prior turns are all turns before the latest turn
+      const priorTurns = turns.slice(0, turns.length - 1);
+      if (priorTurns.length === 0) {
+        sessionHistoryStream.style.display = 'none';
+        sessionHistoryStream.innerHTML = '';
+        return;
+      }
+
+      streamTurnsCache = priorTurns;
+      renderPriorTurnsContent();
+      sessionHistoryStream.style.display = 'block';
+    }
+
+    function renderPriorTurnsContent() {
+      if (!sessionHistoryStream || streamTurnsCache.length === 0) return;
+
+      const priorTurns = streamTurnsCache;
+      // Index them 1-based (Turn 1, Turn 2, ...)
+      const turnsWithIndex = priorTurns.map((turn, i) => ({ ...turn, turnNum: i + 1 }));
+
+      // Order: if 'desc', reverse so Turn N-1 is first, down to Turn 1
+      const displayedTurns = streamHistorySortOrder === 'desc'
+        ? [...turnsWithIndex].reverse()
+        : [...turnsWithIndex];
+
+      // Keep user's expanded state if already toggled open
+      const existingDetails = document.getElementById('sessionHistoryDetails');
+      const wasOpen = existingDetails ? existingDetails.open : false;
 
       let html = `
-        <details class="session-history-details" open>
+        <details class="session-history-details" id="sessionHistoryDetails" ${wasOpen ? 'open' : ''}>
           <summary class="session-history-summary">
-            <span>📜 本轮会话前序对话 (${prevMessages.length} 条记录)</span>
-            <span class="session-history-toggle-tip">点击折叠 / 展开</span>
+            <span>📜 查看更早的对话记录 <span class="session-history-badge">${priorTurns.length} 轮前序对话</span></span>
+            <span class="session-history-toggle-tip">向下滑动按需展开 ▾</span>
           </summary>
           <div class="session-history-list">
+            <div class="session-history-toolbar">
+              <span style="font-size: 11.5px; color: #94a3b8;">本轮会话前序共 ${priorTurns.length} 轮对话</span>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button class="stream-tool-btn" id="streamSortBtn" onclick="window.toggleStreamHistorySort(event)">
+                  ${streamHistorySortOrder === 'desc' ? '⏱️ 倒序 (最新在前)' : '⏱️ 正序 (最早在前)'}
+                </button>
+                <button class="stream-tool-btn" onclick="window.collapseSessionHistory(event)">✕ 收起</button>
+              </div>
+            </div>
       `;
 
-      prevMessages.forEach((m, idx) => {
-        const isUser = m.role === 'user';
-        const roleLabel = isUser ? '👤 用户指令' : '🤖 AI 回答';
-        const timeStr = m.timestamp ? new Date(m.timestamp * (m.timestamp > 1e11 ? 1 : 1000)).toLocaleTimeString() : '';
-        const rawContent = extractMessageText(m.content);
-        const cardClass = isUser ? 'stream-msg-card user' : 'stream-msg-card assistant';
+      displayedTurns.forEach((turn) => {
+        const turnNum = turn.turnNum;
+        const userMsg = turn.user;
+        const userContent = userMsg ? extractMessageText(userMsg.content) : '';
+        const userTime = userMsg?.timestamp ? new Date(userMsg.timestamp * (userMsg.timestamp > 1e11 ? 1 : 1000)).toLocaleTimeString() : '';
 
-        let bodyHtml = '';
-        if (isUser) {
-          bodyHtml = `<div style="white-space: pre-wrap;">${escapeHtml(rawContent)}</div>`;
-        } else {
-          const thought = m.reasoning ? m.reasoning.trim() : '';
-          let thoughtBlock = '';
-          if (thought) {
-            thoughtBlock = `
-              <details class="formal-thought-collapse" style="margin-bottom: 8px;">
-                <summary class="formal-thought-summary">
-                  <span>💡 思考过程 (${thought.length} 字)</span>
-                  <span style="font-size:11px; opacity:0.8;">点击展开</span>
-                </summary>
-                <div class="formal-thought-body">${escapeHtml(thought)}</div>
-              </details>
-            `;
-          }
-          let renderedMarkdown = '';
+        // Combine assistant messages in this turn
+        const asstMsgs = (turn.assistants || []).filter(a => {
+          const t = extractMessageText(a.content);
+          return (t && t.trim().length > 0) || (a.reasoning && a.reasoning.trim().length > 0);
+        });
+
+        let asstText = asstMsgs.map(a => extractMessageText(a.content)).filter(Boolean).join('\n\n');
+        let asstThought = asstMsgs.map(a => (a.reasoning || '').trim()).filter(Boolean).join('\n\n');
+        const asstTime = asstMsgs[asstMsgs.length - 1]?.timestamp 
+          ? new Date(asstMsgs[asstMsgs.length - 1].timestamp * (asstMsgs[asstMsgs.length - 1].timestamp > 1e11 ? 1 : 1000)).toLocaleTimeString()
+          : '';
+
+        let thoughtHtml = '';
+        if (asstThought) {
+          thoughtHtml = `
+            <details class="formal-thought-collapse" style="margin-bottom: 8px;">
+              <summary class="formal-thought-summary">
+                <span>💡 思考过程 (${asstThought.length} 字)</span>
+                <span style="font-size:11px; opacity:0.8;">点击展开</span>
+              </summary>
+              <div class="formal-thought-body">${escapeHtml(asstThought)}</div>
+            </details>
+          `;
+        }
+
+        let renderedAiHtml = '';
+        if (asstText) {
           try {
-            renderedMarkdown = renderMarkdown(rawContent);
+            renderedAiHtml = renderMarkdown(asstText);
           } catch {
-            renderedMarkdown = `<pre style="white-space: pre-wrap;">${escapeHtml(rawContent)}</pre>`;
+            renderedAiHtml = `<pre style="white-space: pre-wrap;">${escapeHtml(asstText)}</pre>`;
           }
-          bodyHtml = thoughtBlock + renderedMarkdown;
+        } else {
+          renderedAiHtml = '<div style="color: #64748b; font-size: 13px;">(无文字输出)</div>';
         }
 
         html += `
-          <div class="${cardClass}">
-            <div class="stream-msg-header">
-              <span>${roleLabel}</span>
-              <div class="stream-msg-actions">
-                <span class="stream-msg-time">${timeStr}</span>
-                <button class="stream-msg-copy-btn" onclick="copyStreamHistoryItem(${idx}, this)">📋 复制</button>
+          <div class="stream-turn-card">
+            <div class="stream-turn-header">
+              <span class="stream-turn-badge">🔹 第 ${turnNum} 轮对话</span>
+              <span class="stream-turn-time">${userTime || asstTime || ''}</span>
+            </div>
+            ${userContent ? `
+              <div class="stream-turn-user">
+                <div class="stream-turn-user-label">
+                  <span>👤 用户提问</span>
+                  <button class="stream-msg-copy-btn" onclick="window.copyTurnText(this, ${turnNum - 1}, 'user')">📋 复制</button>
+                </div>
+                <div class="stream-turn-user-text">${escapeHtml(userContent)}</div>
+              </div>
+            ` : ''}
+            <div class="stream-turn-ai">
+              <div class="stream-turn-ai-label">
+                <span>🤖 AI 回答</span>
+                <button class="stream-msg-copy-btn" onclick="window.copyTurnText(this, ${turnNum - 1}, 'ai')">📋 复制回复</button>
+              </div>
+              <div class="stream-turn-ai-body">
+                ${thoughtHtml}
+                ${renderedAiHtml}
               </div>
             </div>
-            <div class="stream-msg-body">${bodyHtml}</div>
           </div>
         `;
       });
 
       html += `
           </div>
-          <div class="session-history-divider">
-            <span>⬇️ 最新一轮对话</span>
-          </div>
         </details>
       `;
 
       sessionHistoryStream.innerHTML = html;
-      sessionHistoryStream.style.display = 'block';
     }
+
+    window.toggleStreamHistorySort = function(e) {
+      if (e) e.stopPropagation();
+      streamHistorySortOrder = streamHistorySortOrder === 'desc' ? 'asc' : 'desc';
+      renderPriorTurnsContent();
+    };
+
+    window.collapseSessionHistory = function(e) {
+      if (e) e.stopPropagation();
+      const details = document.getElementById('sessionHistoryDetails');
+      if (details) details.open = false;
+    };
+
+    window.copyTurnText = function(btn, turnIndex, type) {
+      const turn = streamTurnsCache[turnIndex];
+      if (!turn) return;
+      let textToCopy = '';
+      if (type === 'user') {
+        textToCopy = turn.user ? extractMessageText(turn.user.content) : '';
+      } else {
+        textToCopy = (turn.assistants || []).map(a => extractMessageText(a.content)).filter(Boolean).join('\n\n');
+      }
+      if (!textToCopy) return;
+      if (!navigator.clipboard) return;
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '已复制!';
+        setTimeout(() => { btn.textContent = orig; }, 1500);
+      });
+    };
 
     async function loadSessionHistoryStream(sessionId) {
       if (!sessionId) {
@@ -3937,18 +4091,6 @@
       }
       return [];
     }
-
-    window.copyStreamHistoryItem = function(idx, btn) {
-      const msg = streamHistoryCache[idx];
-      if (!msg) return;
-      const text = extractMessageText(msg.content);
-      if (!navigator.clipboard) return;
-      navigator.clipboard.writeText(text).then(() => {
-        const orig = btn.textContent;
-        btn.textContent = '已复制!';
-        setTimeout(() => { btn.textContent = orig; }, 1500);
-      });
-    };
 
     function showUserPrompt(text, timestamp = Date.now()) {
       if (!userPromptCard || !userPromptText) return;
