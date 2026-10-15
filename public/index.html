@@ -1857,6 +1857,148 @@
       overflow-y: auto;
       overscroll-behavior: contain;
     }
+    /* Session History Stream (Inline previous dialogue turns) */
+    .session-history-stream {
+      margin-bottom: 12px;
+    }
+    .session-history-details {
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(59, 130, 246, 0.22);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .session-history-summary {
+      background: rgba(30, 41, 59, 0.65);
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #93c5fd;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+      transition: background 0.15s ease;
+    }
+    .session-history-summary:hover {
+      background: rgba(30, 41, 59, 0.9);
+    }
+    .session-history-toggle-tip {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: normal;
+    }
+    .session-history-list {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .stream-msg-card {
+      border-radius: 10px;
+      padding: 10px 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+    .stream-msg-card.user {
+      background: rgba(37, 99, 235, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+    .stream-msg-card.assistant {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .stream-msg-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11.5px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .stream-msg-card.user .stream-msg-header {
+      color: #93c5fd;
+    }
+    .stream-msg-card.assistant .stream-msg-header {
+      color: #34d399;
+    }
+    .stream-msg-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stream-msg-time {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: normal;
+    }
+    .stream-msg-copy-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      padding: 2px 7px;
+      font-size: 11px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .stream-msg-copy-btn:hover {
+      background: rgba(59, 130, 246, 0.25);
+      border-color: rgba(59, 130, 246, 0.5);
+      color: #ffffff;
+    }
+    .stream-msg-body {
+      font-size: 14px;
+      line-height: 1.65;
+      color: #e2e8f0;
+      word-break: break-word;
+    }
+    .stream-msg-body pre {
+      background: #090d16;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px 10px;
+      overflow-x: auto;
+      margin: 8px 0;
+    }
+    .stream-msg-body code {
+      font-size: 12.5px;
+    }
+    .stream-msg-body table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 8px 0;
+      font-size: 12.5px;
+    }
+    .stream-msg-body th, .stream-msg-body td {
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 6px 10px;
+    }
+    .stream-msg-body th {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .stream-msg-body ul, .stream-msg-body ol {
+      padding-left: 20px;
+      margin: 6px 0;
+    }
+    .stream-msg-body p {
+      margin: 6px 0;
+    }
+    .stream-msg-body h1, .stream-msg-body h2, .stream-msg-body h3 {
+      margin: 10px 0 6px 0;
+      color: #f1f5f9;
+    }
+    .session-history-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 0;
+      font-size: 11px;
+      color: #64748b;
+      border-top: 1px dashed rgba(255, 255, 255, 0.08);
+      background: rgba(15, 23, 42, 0.3);
+      user-select: none;
+    }
   </style>
 </head>
 <body>
@@ -1976,6 +2118,9 @@
           </div>
         </div>
       </div>
+
+      <!-- Inline Session Conversation Stream (for earlier turns in this session) -->
+      <div class="session-history-stream" id="sessionHistoryStream" style="display: none;"></div>
 
       <!-- User's Sent Instruction / Prompt Bubble (clamped to 2 lines; tap to expand) -->
       <div class="user-prompt-card clamped" id="userPromptCard" style="display: none;">
@@ -3120,6 +3265,19 @@
       }
       const candidateThought = summary.reasoning || streamThoughtText || currentAiThought;
       renderAiText(candidateThought);
+
+      if (summary.sessionId) {
+        loadSessionHistoryStream(summary.sessionId).then(msgs => {
+          if (msgs && msgs.length > 0) {
+            for (let i = msgs.length - 1; i >= 0; i--) {
+              if (msgs[i].role === 'user') {
+                showUserPrompt(msgs[i].content, msgs[i].timestamp);
+                break;
+              }
+            }
+          }
+        });
+      }
     }
 
     function updateView() {
@@ -3626,6 +3784,171 @@
     const historyModalBtn = document.getElementById('historyModalBtn');
     const chatHistoryContentList = document.getElementById('chatHistoryContentList');
     const historySessionSubtitle = document.getElementById('historySessionSubtitle');
+    const sessionHistoryStream = document.getElementById('sessionHistoryStream');
+    let streamHistoryCache = [];
+
+    function extractMessageText(content) {
+      if (!content) return '';
+      if (typeof content !== 'string') return String(content);
+      if (content.startsWith('[{"type":') || (content.startsWith('[') && content.endsWith(']'))) {
+        try {
+          const parsed = JSON.parse(content);
+          if (Array.isArray(parsed)) {
+            return parsed
+              .filter(p => p.type === 'text' || p.text)
+              .map(p => p.text || '')
+              .join('\n');
+          }
+        } catch {}
+      }
+      return content;
+    }
+
+    function renderSessionHistoryStream(messages) {
+      if (!sessionHistoryStream) return;
+      if (!messages || messages.length <= 1) {
+        sessionHistoryStream.style.display = 'none';
+        sessionHistoryStream.innerHTML = '';
+        return;
+      }
+
+      let lastUserIdx = -1;
+      let lastAsstIdx = -1;
+
+      for (let i = messages.length - 1; i >= 0; i--) {
+        if (lastAsstIdx === -1 && messages[i].role === 'assistant') {
+          lastAsstIdx = i;
+        }
+        if (lastUserIdx === -1 && messages[i].role === 'user') {
+          lastUserIdx = i;
+        }
+        if (lastUserIdx !== -1 && lastAsstIdx !== -1) break;
+      }
+
+      const isRunning = isStreaming || activeSessionsMap.has(currentActiveSessionId);
+      let prevMessages = [];
+      if (isRunning) {
+        const cutIdx = lastUserIdx !== -1 ? lastUserIdx : messages.length;
+        prevMessages = messages.slice(0, cutIdx);
+      } else {
+        const cutIdx = lastUserIdx !== -1 ? lastUserIdx : (lastAsstIdx !== -1 ? lastAsstIdx : messages.length - 1);
+        prevMessages = messages.slice(0, cutIdx);
+      }
+
+      // Filter out empty placeholder or non-content messages
+      prevMessages = prevMessages.filter(m => {
+        const text = extractMessageText(m.content);
+        return (text && text.trim().length > 0) || (m.reasoning && m.reasoning.trim().length > 0);
+      });
+
+      if (prevMessages.length === 0) {
+        sessionHistoryStream.style.display = 'none';
+        sessionHistoryStream.innerHTML = '';
+        return;
+      }
+
+      streamHistoryCache = prevMessages;
+
+      let html = `
+        <details class="session-history-details" open>
+          <summary class="session-history-summary">
+            <span>📜 本轮会话前序对话 (${prevMessages.length} 条记录)</span>
+            <span class="session-history-toggle-tip">点击折叠 / 展开</span>
+          </summary>
+          <div class="session-history-list">
+      `;
+
+      prevMessages.forEach((m, idx) => {
+        const isUser = m.role === 'user';
+        const roleLabel = isUser ? '👤 用户指令' : '🤖 AI 回答';
+        const timeStr = m.timestamp ? new Date(m.timestamp * (m.timestamp > 1e11 ? 1 : 1000)).toLocaleTimeString() : '';
+        const rawContent = extractMessageText(m.content);
+        const cardClass = isUser ? 'stream-msg-card user' : 'stream-msg-card assistant';
+
+        let bodyHtml = '';
+        if (isUser) {
+          bodyHtml = `<div style="white-space: pre-wrap;">${escapeHtml(rawContent)}</div>`;
+        } else {
+          const thought = m.reasoning ? m.reasoning.trim() : '';
+          let thoughtBlock = '';
+          if (thought) {
+            thoughtBlock = `
+              <details class="formal-thought-collapse" style="margin-bottom: 8px;">
+                <summary class="formal-thought-summary">
+                  <span>💡 思考过程 (${thought.length} 字)</span>
+                  <span style="font-size:11px; opacity:0.8;">点击展开</span>
+                </summary>
+                <div class="formal-thought-body">${escapeHtml(thought)}</div>
+              </details>
+            `;
+          }
+          let renderedMarkdown = '';
+          try {
+            renderedMarkdown = renderMarkdown(rawContent);
+          } catch {
+            renderedMarkdown = `<pre style="white-space: pre-wrap;">${escapeHtml(rawContent)}</pre>`;
+          }
+          bodyHtml = thoughtBlock + renderedMarkdown;
+        }
+
+        html += `
+          <div class="${cardClass}">
+            <div class="stream-msg-header">
+              <span>${roleLabel}</span>
+              <div class="stream-msg-actions">
+                <span class="stream-msg-time">${timeStr}</span>
+                <button class="stream-msg-copy-btn" onclick="copyStreamHistoryItem(${idx}, this)">📋 复制</button>
+              </div>
+            </div>
+            <div class="stream-msg-body">${bodyHtml}</div>
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+          <div class="session-history-divider">
+            <span>⬇️ 最新一轮对话</span>
+          </div>
+        </details>
+      `;
+
+      sessionHistoryStream.innerHTML = html;
+      sessionHistoryStream.style.display = 'block';
+    }
+
+    async function loadSessionHistoryStream(sessionId) {
+      if (!sessionId) {
+        renderSessionHistoryStream([]);
+        return [];
+      }
+      try {
+        const res = await fetch(`/api/chat/messages?session=${encodeURIComponent(sessionId)}&limit=60`);
+        if (res.ok) {
+          const data = await res.json();
+          const msgs = data.messages || [];
+          if (sessionId === currentActiveSessionId) {
+            renderSessionHistoryStream(msgs);
+          }
+          return msgs;
+        }
+      } catch (e) {
+        console.warn('Failed to load session history stream:', e);
+      }
+      return [];
+    }
+
+    window.copyStreamHistoryItem = function(idx, btn) {
+      const msg = streamHistoryCache[idx];
+      if (!msg) return;
+      const text = extractMessageText(msg.content);
+      if (!navigator.clipboard) return;
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '已复制!';
+        setTimeout(() => { btn.textContent = orig; }, 1500);
+      });
+    };
 
     function showUserPrompt(text, timestamp = Date.now()) {
       if (!userPromptCard || !userPromptText) return;
@@ -3735,10 +4058,11 @@
       }
 
       try {
-        const res = await fetch(`/api/chat/messages?session=${encodeURIComponent(sid)}`);
+        const res = await fetch(`/api/chat/messages?session=${encodeURIComponent(sid)}&limit=60`);
         if (res.ok) {
           const data = await res.json();
           const msgs = data.messages || [];
+          renderSessionHistoryStream(msgs);
           for (let i = msgs.length - 1; i >= 0; i--) {
             if (msgs[i].role === 'user') {
               showUserPrompt(msgs[i].content, msgs[i].timestamp);
@@ -3773,11 +4097,12 @@
       } catch {}
 
       try {
-        const msgRes = await fetch(`/api/chat/messages?session=${encodeURIComponent(sid)}`);
+        const msgRes = await fetch(`/api/chat/messages?session=${encodeURIComponent(sid)}&limit=60`);
         if (msgRes.ok) {
           const data = await msgRes.json();
           const msgs = data.messages || [];
           if (msgs.length > 0) {
+            renderSessionHistoryStream(msgs);
             let lastUserMsg = null;
             let lastAssistantMsg = null;
             for (let i = msgs.length - 1; i >= 0; i--) {
@@ -3829,6 +4154,10 @@
 
     async function switchSessionView(sid, title) {
       if (!sid) return;
+      if (sessionHistoryStream) {
+        sessionHistoryStream.style.display = 'none';
+        sessionHistoryStream.innerHTML = '';
+      }
       setCurrentSession(sid, title);
 
       if (activeSessionsMap.has(sid)) {
@@ -3991,6 +4320,12 @@
       currentAiThought = '';
       startStreamingWaterfall();
       completionCard.style.display = 'block';
+
+      // Refresh previous turns into stream
+      const previousSid = currentActiveSessionId;
+      if (previousSid) {
+        loadSessionHistoryStream(previousSid);
+      }
 
       // Smoothly bring response into view
       setTimeout(() => {

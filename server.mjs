@@ -1147,7 +1147,8 @@ const server = http.createServer(async (req, res) => {
 
   if (url.pathname === '/api/chat/messages' || url.pathname === '/api/chat/history') {
     const sid = url.searchParams.get('session') || latestCompletion?.sessionId || getRecentSessions(1)[0]?.id
-    const messages = getSessionMessages(sid, 30)
+    const limit = Math.min(100, Math.max(10, parseInt(url.searchParams.get('limit') || '60', 10)))
+    const messages = getSessionMessages(sid, limit)
     res.writeHead(200, { 'Content-Type': 'application/json' })
     res.end(JSON.stringify({ session_id: sid, messages }))
     return
