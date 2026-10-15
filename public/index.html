@@ -1258,85 +1258,66 @@
 
     .chat-bar-top {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      flex-direction: column;
+      gap: 6px;
       margin-bottom: 6px;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .active-session-chip {
+      display: flex;
+      align-items: center;
       gap: 8px;
-    }
-
-    .chat-session-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      color: #93c5fd;
-      cursor: pointer;
-      max-width: 65%;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      user-select: none;
-    }
-
-    .chat-session-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #10b981;
-      flex-shrink: 0;
-    }
-
-    .chat-session-title {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .chat-status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      color: #fbbf24;
-      background: rgba(245, 158, 11, 0.12);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      padding: 3px 8px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.28);
+      padding: 5px 10px;
       border-radius: 12px;
-      white-space: nowrap;
+      font-size: 12px;
+      color: #e2e8f0;
+      cursor: pointer;
+      transition: background 0.15s;
     }
 
-    .chat-spin-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #fbbf24;
-      animation: pulseDot 1s infinite alternate;
+    .active-session-chip:hover {
+      background: rgba(16, 185, 129, 0.15);
+    }
+
+    .active-chip-title {
+      font-weight: 600;
+      color: #34d399;
+      white-space: nowrap;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
       flex-shrink: 0;
     }
 
-    @keyframes pulseDot {
-      0% { transform: scale(0.8); opacity: 0.5; }
-      100% { transform: scale(1.3); opacity: 1; }
+    .active-chip-thought {
+      flex: 1;
+      color: #fbbf24;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 11.5px;
     }
 
-    .chat-abort-btn {
-      background: rgba(239, 68, 68, 0.18);
+    .active-chip-abort {
+      background: rgba(239, 68, 68, 0.2);
       border: 1px solid rgba(239, 68, 68, 0.4);
       color: #f87171;
-      padding: 3px 8px;
-      border-radius: 10px;
-      font-size: 11px;
+      border-radius: 6px;
+      padding: 1px 6px;
+      font-size: 10px;
       font-weight: 600;
       cursor: pointer;
-      white-space: nowrap;
+      flex-shrink: 0;
+      line-height: 1.4;
+      transition: all 0.15s;
     }
 
-    .chat-abort-btn:active {
-      background: rgba(239, 68, 68, 0.35);
+    .active-chip-abort:hover {
+      background: rgba(239, 68, 68, 0.4);
     }
 
     .chat-input-row {
@@ -1493,14 +1474,156 @@
 
     /* Completion card: flatter, less chrome */
     .completion-card { padding: 10px 12px; border-radius: 14px; }
-    .completion-header { margin-bottom: 6px; gap: 8px; }
-    .completion-badge {
-      min-width: 0; flex: 1; padding: 0; background: none; border: none;
-      font-size: 12.5px; gap: 6px;
+    .completion-header {
+      margin-bottom: 6px;
+      gap: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+    .completion-session-dropdown {
+      position: relative;
+      min-width: 0;
+      flex: 1;
+    }
+    .completion-dropdown-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 4px 10px;
+      color: var(--text-primary, #fff);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      max-width: 100%;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    .completion-dropdown-trigger:hover, .completion-dropdown-trigger:active {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(96, 165, 250, 0.4);
+    }
+    .completion-status-icon {
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
     }
     .completion-title {
-      font-weight: 600; color: #cbd5e1;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-weight: 600;
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 240px;
+    }
+    .dropdown-arrow {
+      font-size: 10px;
+      color: var(--text-muted, #94a3b8);
+      margin-left: 2px;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .completion-session-dropdown.open .dropdown-arrow {
+      transform: rotate(180deg);
+    }
+    .completion-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      width: 320px;
+      max-width: 88vw;
+      max-height: 300px;
+      overflow-y: auto;
+      background: #161821;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      padding: 6px 0;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .completion-dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-size: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: #cbd5e1;
+    }
+    .completion-dropdown-item:last-child {
+      border-bottom: none;
+    }
+    .completion-dropdown-item:hover {
+      background: rgba(59, 130, 246, 0.15);
+    }
+    .completion-dropdown-item.active {
+      background: rgba(59, 130, 246, 0.22);
+      color: #93c5fd;
+      font-weight: 600;
+    }
+    .dropdown-item-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex: 1;
+    }
+    .dropdown-item-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .dropdown-item-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .tag-live {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 8px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      font-weight: 600;
+    }
+    .tag-time {
+      font-size: 10px;
+      color: var(--text-muted, #64748b);
+    }
+    .dot-live {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: livePulsing 1.8s infinite;
+      flex-shrink: 0;
+      display: inline-block;
+    }
+    @keyframes livePulsing {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1.15); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .dot-idle {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      flex-shrink: 0;
+      display: inline-block;
     }
     .completion-time { flex-shrink: 0; font-family: var(--font-mono); }
 
@@ -1797,9 +1920,13 @@
     <!-- 3. Latest Task Completion & Usage Summary Card (compact layout) -->
     <div class="completion-card" id="completionCard" style="display: none;">
       <div class="completion-header">
-        <div class="completion-badge">
-          <span>✅</span>
-          <span id="completionSessionTitle" class="completion-title"></span>
+        <div class="completion-session-dropdown" id="completionSessionDropdown">
+          <button class="completion-dropdown-trigger" id="completionSessionTrigger" type="button" title="点击切换其他会话">
+            <span class="completion-status-icon" id="completionStatusIcon">✅</span>
+            <span id="completionSessionTitle" class="completion-title">当前会话</span>
+            <span class="dropdown-arrow">▾</span>
+          </button>
+          <div class="completion-dropdown-menu" id="completionDropdownMenu" style="display: none;"></div>
         </div>
         <span class="completion-time" id="completionTimeText">刚刚</span>
       </div>
@@ -1958,18 +2085,7 @@
 
   <!-- Mobile Sticky Chat Bar -->
   <div class="chat-bar-container" id="chatBarContainer">
-    <div class="chat-bar-top">
-      <div class="chat-session-badge" id="chatSessionBadge" title="点击切换会话">
-        <span class="chat-session-dot"></span>
-        <span class="chat-session-title" id="chatSessionTitleText">加载会话中...</span>
-        <span style="font-size: 10px; color: var(--text-muted); margin-left: 2px;">▾</span>
-      </div>
-      <div class="chat-status-pill" id="chatStatusPill" style="display: none;">
-        <span class="chat-spin-dot"></span>
-        <span id="chatStatusText">AI 正在思考...</span>
-      </div>
-      <button class="chat-abort-btn" id="chatAbortBtn" style="display: none;">⏹️ 终止</button>
-    </div>
+    <div class="chat-bar-top" id="chatBarTop" style="display: none;"></div>
     <div class="chat-input-row">
       <textarea
         id="chatTextInput"
@@ -2946,7 +3062,12 @@
         return;
       }
       completionCard.style.display = 'block';
+      if (summary.sessionId) {
+        currentActiveSessionId = summary.sessionId;
+        currentActiveSessionTitle = summary.sessionTitle || summary.sessionId;
+      }
       completionSessionTitle.textContent = summary.sessionTitle || '任务已完成';
+      updateCompletionStatusIcon();
       completionTimeText.textContent = summary.completedAt ? new Date(summary.completedAt).toLocaleTimeString() : '刚刚';
 
       valOutputTokens.textContent = summary.stats.outputTokens || '0';
@@ -3179,6 +3300,20 @@
           }
         }
 
+        if (data.activeSessions) {
+          activeSessionsMap.clear();
+          data.activeSessions.forEach(s => activeSessionsMap.set(s.sessionId, s));
+        } else if (data.runningSessionId) {
+          activeSessionsMap.set(data.runningSessionId, {
+            sessionId: data.runningSessionId,
+            title: getSessionTitle(data.runningSessionId),
+            thought: 'AI 正在处理指令...',
+            status: 'running'
+          });
+        }
+        renderActiveSessionsTopBar();
+        updateCompletionStatusIcon();
+
         if (data.allSummaries && data.allSummaries.length > 0) {
           allSummaries = data.allSummaries;
           initSummarySelection();
@@ -3240,27 +3375,44 @@
         clarifiesMap.delete(data.clarify_id);
         updateView();
       } else if (data.type === 'run.started') {
+        if (data.activeSessions) {
+          activeSessionsMap.clear();
+          data.activeSessions.forEach(s => activeSessionsMap.set(s.sessionId, s));
+        } else if (data.session_id) {
+          activeSessionsMap.set(data.session_id, {
+            sessionId: data.session_id,
+            title: getSessionTitle(data.session_id),
+            thought: 'AI 正在处理指令...',
+            status: 'running'
+          });
+        }
+        renderActiveSessionsTopBar();
+        if (completionDropdownOpen) renderCompletionDropdownList();
+
         if (data.session_id) {
           if (!currentActiveSessionId) {
             const matched = recentSessionsList.find(s => s.id === data.session_id);
             setCurrentSession(data.session_id, matched?.title || data.session_id);
           }
         }
-        if (chatStatusPill) {
-          chatStatusPill.style.display = 'inline-flex';
-          chatStatusText.textContent = 'AI 正在处理指令...';
-        }
-        if (chatAbortBtn) chatAbortBtn.style.display = 'inline-block';
+        updateCompletionStatusIcon();
         if (!isStreaming) {
           startStreamingWaterfall();
           completionCard.style.display = 'block';
         }
       } else if (data.type === 'chat.thought') {
-        if (chatStatusPill) {
-          chatStatusPill.style.display = 'inline-flex';
-          const snippet = (data.thought || '').replace(/\n/g, ' ').slice(0, 22);
-          chatStatusText.textContent = snippet ? `思考: ${snippet}...` : 'AI 正在思考...';
+        if (data.activeSessions) {
+          activeSessionsMap.clear();
+          data.activeSessions.forEach(s => activeSessionsMap.set(s.sessionId, s));
+        } else if (data.session_id) {
+          let item = activeSessionsMap.get(data.session_id) || { sessionId: data.session_id, title: getSessionTitle(data.session_id) };
+          item.thought = (data.thought || '').replace(/\n/g, ' ').slice(0, 150);
+          item.status = 'thinking';
+          activeSessionsMap.set(data.session_id, item);
         }
+        renderActiveSessionsTopBar();
+        if (completionDropdownOpen) renderCompletionDropdownList();
+
         if (!currentActiveSessionId && data.session_id) {
           setCurrentSession(data.session_id);
         }
@@ -3282,8 +3434,16 @@
           showUserPrompt(data.message, data.timestamp);
         }
       } else if (data.type === 'chat.aborted') {
-        if (chatStatusPill) chatStatusPill.style.display = 'none';
-        if (chatAbortBtn) chatAbortBtn.style.display = 'none';
+        if (data.activeSessions) {
+          activeSessionsMap.clear();
+          data.activeSessions.forEach(s => activeSessionsMap.set(s.sessionId, s));
+        } else if (data.session_id) {
+          activeSessionsMap.delete(data.session_id);
+        }
+        renderActiveSessionsTopBar();
+        if (completionDropdownOpen) renderCompletionDropdownList();
+        updateCompletionStatusIcon();
+
         finishStreamingAndShowFormalResponse(null, true);
         addLog({ id: Date.now(), timestamp: Date.now(), type: 'system', text: '⏹️ 当前任务已终止' });
       } else if (data.type === 'run.stage_completed') {
@@ -3291,7 +3451,28 @@
           allSummaries = data.allSummaries;
           renderHistoryPills();
         }
+      } else if (data.type === 'run.failed') {
+        if (data.activeSessions) {
+          activeSessionsMap.clear();
+          data.activeSessions.forEach(s => activeSessionsMap.set(s.sessionId, s));
+        } else if (data.session_id) {
+          activeSessionsMap.delete(data.session_id);
+        }
+        renderActiveSessionsTopBar();
+        if (completionDropdownOpen) renderCompletionDropdownList();
+        updateCompletionStatusIcon();
       } else if (data.type === 'run.completed' || data.type === 'run.completed_silent') {
+        if (data.activeSessions) {
+          activeSessionsMap.clear();
+          data.activeSessions.forEach(s => activeSessionsMap.set(s.sessionId, s));
+        } else {
+          const sid = data.summary?.sessionId || data.session_id;
+          if (sid) activeSessionsMap.delete(sid);
+        }
+        renderActiveSessionsTopBar();
+        if (completionDropdownOpen) renderCompletionDropdownList();
+        updateCompletionStatusIcon();
+
         // If current session is streaming and incoming completion is from another session, don't hijack current view
         if (isStreaming && data.summary?.sessionId && currentActiveSessionId && data.summary.sessionId !== currentActiveSessionId) {
           console.log('[Mobile WS] Completion for background session, keeping current streaming view:', data.summary.sessionId);
@@ -3308,9 +3489,6 @@
         } else {
           finishStreamingAndShowFormalResponse(data.summary);
         }
-
-        if (chatStatusPill) chatStatusPill.style.display = 'none';
-        if (chatAbortBtn) chatAbortBtn.style.display = 'none';
 
         if (data.type !== 'run.completed_silent') {
           const sid = data.summary?.sessionId || data.session_id || 'active';
@@ -3391,14 +3569,17 @@
     let currentActiveSessionId = '';
     let currentActiveSessionTitle = '';
     let recentSessionsList = [];
+    const activeSessionsMap = new Map(); // sessionId -> { sessionId, title, thought, status }
 
-    const chatSessionBadge = document.getElementById('chatSessionBadge');
-    const chatSessionTitleText = document.getElementById('chatSessionTitleText');
-    const chatStatusPill = document.getElementById('chatStatusPill');
-    const chatStatusText = document.getElementById('chatStatusText');
-    const chatAbortBtn = document.getElementById('chatAbortBtn');
+    const chatBarTop = document.getElementById('chatBarTop');
     const chatTextInput = document.getElementById('chatTextInput');
     const chatSendBtn = document.getElementById('chatSendBtn');
+
+    const completionSessionDropdown = document.getElementById('completionSessionDropdown');
+    const completionSessionTrigger = document.getElementById('completionSessionTrigger');
+    const completionDropdownMenu = document.getElementById('completionDropdownMenu');
+    const completionStatusIcon = document.getElementById('completionStatusIcon');
+    let completionDropdownOpen = false;
 
     const userPromptCard = document.getElementById('userPromptCard');
     const userPromptText = document.getElementById('userPromptText');
@@ -3421,14 +3602,159 @@
       userPromptCard.style.display = 'block';
     }
 
+    function getSessionTitle(sid) {
+      if (!sid) return '当前会话';
+      if (sid === currentActiveSessionId && currentActiveSessionTitle) return currentActiveSessionTitle;
+      const found = (recentSessionsList || []).find(s => s.id === sid);
+      if (found?.title) return found.title;
+      const foundSum = (allSummaries || []).find(s => s.sessionId === sid);
+      if (foundSum?.sessionTitle) return foundSum.sessionTitle;
+      return sid;
+    }
+
     function setCurrentSession(sid, title) {
       if (!sid) return;
       currentActiveSessionId = sid;
-      currentActiveSessionTitle = title || sid;
-      if (chatSessionTitleText) {
-        chatSessionTitleText.textContent = currentActiveSessionTitle || '未命名会话';
+      currentActiveSessionTitle = title || getSessionTitle(sid);
+      if (completionSessionTitle) {
+        completionSessionTitle.textContent = currentActiveSessionTitle || '当前会话';
+      }
+      updateCompletionStatusIcon();
+    }
+
+    function updateCompletionStatusIcon() {
+      if (!completionStatusIcon) return;
+      const isCurrentActive = activeSessionsMap.has(currentActiveSessionId);
+      if (isCurrentActive) {
+        completionStatusIcon.innerHTML = '<span class="dot-live"></span>';
+      } else {
+        completionStatusIcon.textContent = '✅';
       }
     }
+
+    function renderActiveSessionsTopBar() {
+      if (!chatBarTop) return;
+      const list = Array.from(activeSessionsMap.values());
+      if (list.length === 0) {
+        chatBarTop.style.display = 'none';
+        chatBarTop.innerHTML = '';
+        return;
+      }
+      chatBarTop.style.display = 'flex';
+      chatBarTop.innerHTML = list.map(item => {
+        const sid = item.sessionId;
+        const title = escapeHtml(item.title || getSessionTitle(sid));
+        const thought = escapeHtml(item.thought || 'AI 正在处理指令...');
+        return `
+          <div class="active-session-chip" data-sid="${escapeHtml(sid)}" onclick="switchSessionFromChip('${escapeHtml(sid)}')">
+            <span class="dot-live" title="会话运行中"></span>
+            <span class="active-chip-title" title="${title}">${title}</span>
+            <span class="active-chip-thought" title="${thought}">思考: ${thought}</span>
+            <button class="active-chip-abort" title="终止该会话" onclick="abortSpecificSession('${escapeHtml(sid)}', event)">⏹️ 终止</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleCompletionDropdown(e) {
+      if (e) e.stopPropagation();
+      completionDropdownOpen = !completionDropdownOpen;
+      if (completionDropdownOpen) {
+        completionSessionDropdown?.classList.add('open');
+        if (completionDropdownMenu) completionDropdownMenu.style.display = 'block';
+        renderCompletionDropdownList();
+      } else {
+        closeCompletionDropdown();
+      }
+    }
+
+    function closeCompletionDropdown() {
+      completionDropdownOpen = false;
+      completionSessionDropdown?.classList.remove('open');
+      if (completionDropdownMenu) completionDropdownMenu.style.display = 'none';
+    }
+
+    document.addEventListener('click', (e) => {
+      if (completionDropdownOpen && !completionSessionDropdown?.contains(e.target)) {
+        closeCompletionDropdown();
+      }
+    });
+
+    if (completionSessionTrigger) {
+      completionSessionTrigger.addEventListener('click', toggleCompletionDropdown);
+    }
+
+    async function renderCompletionDropdownList() {
+      if (!completionDropdownMenu) return;
+      try {
+        const res = await fetch('/api/sessions');
+        if (res.ok) {
+          recentSessionsList = await res.json();
+        }
+      } catch {}
+
+      if (!recentSessionsList || recentSessionsList.length === 0) {
+        completionDropdownMenu.innerHTML = '<div style="padding:12px; text-align:center; color:#94a3b8; font-size:12px;">暂无可切换的会话</div>';
+        return;
+      }
+
+      completionDropdownMenu.innerHTML = recentSessionsList.map(s => {
+        const isActive = activeSessionsMap.has(s.id) || s.is_active;
+        const isCurrent = s.id === currentActiveSessionId;
+        const timeStr = s.last_active ? new Date(s.last_active * (s.last_active > 1e11 ? 1 : 1000)).toLocaleTimeString() : '';
+        return `
+          <div class="completion-dropdown-item ${isCurrent ? 'active' : ''}" onclick="selectSessionFromDropdown('${escapeHtml(s.id)}', '${escapeHtml(s.title || s.id)}')">
+            <div class="dropdown-item-left">
+              <span class="${isActive ? 'dot-live' : 'dot-idle'}" title="${isActive ? '会话正在执行中' : '空闲'}"></span>
+              <span class="dropdown-item-title" title="${escapeHtml(s.title || s.id)}">${escapeHtml(s.title || s.id)}</span>
+            </div>
+            <div class="dropdown-item-right">
+              ${isActive ? '<span class="tag-live">运行中</span>' : ''}
+              <span class="tag-time">${timeStr}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.selectSessionFromDropdown = function(sid, title) {
+      closeCompletionDropdown();
+      setCurrentSession(sid, title);
+      const foundIdx = allSummaries.findIndex(sum => sum.sessionId === sid);
+      if (foundIdx !== -1) {
+        selectSummary(foundIdx);
+      } else {
+        fetchSummaryForSession(sid);
+      }
+    };
+
+    window.switchSessionFromChip = function(sid) {
+      const item = activeSessionsMap.get(sid);
+      const title = item?.title || getSessionTitle(sid);
+      setCurrentSession(sid, title);
+      const foundIdx = allSummaries.findIndex(sum => sum.sessionId === sid);
+      if (foundIdx !== -1) {
+        selectSummary(foundIdx);
+      } else {
+        fetchSummaryForSession(sid);
+      }
+    };
+
+    window.abortSpecificSession = async function(sid, event) {
+      if (event) event.stopPropagation();
+      if (!confirm('确定要终止该会话任务吗？')) return;
+      try {
+        await fetch('/api/chat/abort', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sid })
+        });
+      } catch {}
+      activeSessionsMap.delete(sid);
+      renderActiveSessionsTopBar();
+      if (completionDropdownOpen) renderCompletionDropdownList();
+      updateCompletionStatusIcon();
+    };
 
     // Auto-grow textarea
     chatTextInput.addEventListener('input', () => {
@@ -3438,8 +3764,6 @@
     });
 
     // Keep the fixed chat bar above the soft keyboard.
-    // On iOS Safari / many Android browsers the keyboard only shrinks the *visual* viewport,
-    // so a `position: fixed; bottom: 0` element stays hidden behind it. We translate it up.
     (function setupKeyboardAvoidance() {
       const bar = document.getElementById('chatBarContainer');
       const vv = window.visualViewport;
@@ -3460,7 +3784,6 @@
       window.addEventListener('resize', update);
 
       chatTextInput.addEventListener('focus', () => {
-        // Keyboard animates in; re-check a few times, then make sure the input is visible
         [50, 200, 400, 700].forEach(t => setTimeout(update, t));
         setTimeout(() => {
           try { chatTextInput.scrollIntoView({ block: 'nearest' }); } catch (_) {}
@@ -3489,10 +3812,15 @@
 
       showUserPrompt(text);
 
-      // Show thinking status
-      chatStatusPill.style.display = 'inline-flex';
-      chatStatusText.textContent = 'AI 正在准备执行...';
-      chatAbortBtn.style.display = 'inline-block';
+      // Add to activeSessionsMap immediately
+      activeSessionsMap.set(currentActiveSessionId, {
+        sessionId: currentActiveSessionId,
+        title: currentActiveSessionTitle || getSessionTitle(currentActiveSessionId),
+        thought: 'AI 正在准备执行...',
+        status: 'running'
+      });
+      renderActiveSessionsTopBar();
+      updateCompletionStatusIcon();
 
       // Start streaming waterfall in aiResponseContent
       currentAiOutput = '';
@@ -3517,48 +3845,33 @@
         const ret = await res.json();
         if (!res.ok) {
           alert('发送失败: ' + (ret.error || '服务器错误'));
-          chatStatusPill.style.display = 'none';
-          chatAbortBtn.style.display = 'none';
+          activeSessionsMap.delete(currentActiveSessionId);
+          renderActiveSessionsTopBar();
+          updateCompletionStatusIcon();
         } else if (ret.session_id) {
           setCurrentSession(ret.session_id);
         }
       } catch (err) {
         alert('网络请求失败: ' + err.message);
-        chatStatusPill.style.display = 'none';
-        chatAbortBtn.style.display = 'none';
+        activeSessionsMap.delete(currentActiveSessionId);
+        renderActiveSessionsTopBar();
+        updateCompletionStatusIcon();
       }
     }
 
     chatSendBtn.addEventListener('click', sendChatPrompt);
 
-    chatAbortBtn.addEventListener('click', async () => {
-      if (!confirm('确定要终止当前 AI 任务吗？')) return;
-      chatAbortBtn.disabled = true;
-      chatAbortBtn.textContent = '终止中...';
-      try {
-        await fetch('/api/chat/abort', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ session_id: currentActiveSessionId })
-        });
-      } catch {}
-      chatAbortBtn.disabled = false;
-      chatAbortBtn.textContent = '⏹️ 终止';
-    });
+    if (closeSessionModalBtn) {
+      closeSessionModalBtn.addEventListener('click', () => {
+        sessionModalOverlay?.classList.remove('active');
+      });
+    }
 
-    // Session Switcher Modal
-    chatSessionBadge.addEventListener('click', async () => {
-      sessionModalOverlay.classList.add('active');
-      await renderSessionListModal();
-    });
-
-    closeSessionModalBtn.addEventListener('click', () => {
-      sessionModalOverlay.classList.remove('active');
-    });
-
-    sessionModalOverlay.addEventListener('click', (e) => {
-      if (e.target === sessionModalOverlay) sessionModalOverlay.classList.remove('active');
-    });
+    if (sessionModalOverlay) {
+      sessionModalOverlay.addEventListener('click', (e) => {
+        if (e.target === sessionModalOverlay) sessionModalOverlay.classList.remove('active');
+      });
+    }
 
     async function renderSessionListModal() {
       try {
@@ -3568,6 +3881,7 @@
         }
       } catch {}
 
+      if (!sessionListContainer) return;
       if (!recentSessionsList || recentSessionsList.length === 0) {
         sessionListContainer.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 20px 0;">暂无可切换的会话</div>';
         return;
@@ -3576,11 +3890,18 @@
       sessionListContainer.innerHTML = '';
       recentSessionsList.forEach(s => {
         const item = document.createElement('div');
+        const isActive = activeSessionsMap.has(s.id) || s.is_active;
         item.className = `session-list-item ${s.id === currentActiveSessionId ? 'active' : ''}`;
         const timeStr = s.last_active ? new Date(s.last_active * (s.last_active > 1e11 ? 1 : 1000)).toLocaleString() : '';
         item.innerHTML = `
-          <div class="session-item-title">${escapeHtml(s.title || s.id)}</div>
-          <div class="session-item-sub">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+              <span class="${isActive ? 'dot-live' : 'dot-idle'}" title="${isActive ? '会话正在执行中' : '空闲'}"></span>
+              <div class="session-item-title">${escapeHtml(s.title || s.id)}</div>
+            </div>
+            ${isActive ? '<span class="tag-live">运行中</span>' : ''}
+          </div>
+          <div class="session-item-sub" style="margin-left: 16px;">
             <span>Profile: <b>${escapeHtml(s.profile || 'default')}</b></span>
             <span>${timeStr}</span>
           </div>
@@ -3588,7 +3909,6 @@
         item.onclick = () => {
           setCurrentSession(s.id, s.title);
           sessionModalOverlay.classList.remove('active');
-          // Load this session's summary or history
           const foundIdx = allSummaries.findIndex(sum => sum.sessionId === s.id);
           if (foundIdx !== -1) {
             selectSummary(foundIdx);

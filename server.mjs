@@ -409,6 +409,16 @@ const joinedSessions = new Set()
 const mobileSockets = new Set()
 let latestCompletion = getLatestTaskSummary()
 let currentRunningSessionId = null
+const activeSessionsMap = new Map() // sessionId -> { sessionId, title, thought, status, startTime, lastUpdate }
+
+function getSessionTitleById(sid) {
+  try {
+    const list = getRecentSessions(50)
+    const found = list.find(s => s.id === sid)
+    if (found?.title) return found.title
+  } catch {}
+  return sid
+}
 
 function appendLog(type, text, sessionId = '') {
   const item = {
@@ -684,9 +694,32 @@ async function connectToHermes() {
 
   const handleThought = (data) => {
     const thought = data?.thought || data?.text || data?.delta
+    const sid = data?.session_id
     if (thought) {
-      appendLog('thought', thought, data.session_id)
-      broadcast({ type: 'chat.thought', session_id: data.session_id, thought })
+      appendLog('thought', thought, sid)
+      if (sid) {
+        let entry = activeSessionsMap.get(sid)
+        if (!entry) {
+          entry = {
+            sessionId: sid,
+            title: getSessionTitleById(sid),
+            startTime: Date.now()
+          }
+        }
+        if (entry.title === sid) {
+          entry.title = getSessionTitleById(sid)
+        }
+        entry.thought = String(thought).replace(/\n/g, ' ').slice(0, 150)
+        entry.status = 'thinking'
+        entry.lastUpdate = Date.now()
+        activeSessionsMap.set(sid, entry)
+      }
+      broadcast({
+        type: 'chat.thought',
+        session_id: sid,
+        thought,
+        activeSessions: Array.from(activeSessionsMap.values())
+      })
     }
   }
   chatRunSocket.on('agent.thought', handleThought)
@@ -697,16 +730,38 @@ async function connectToHermes() {
     const sid = data?.session_id
     console.log('[Hermes Socket] Received run.started:', sid)
     currentRunningSessionId = sid || null
+    if (sid) {
+      activeSessionsMap.set(sid, {
+        sessionId: sid,
+        title: getSessionTitleById(sid),
+        thought: 'AI 正在准备执行...',
+        status: 'running',
+        startTime: Date.now(),
+        lastUpdate: Date.now()
+      })
+    }
     appendLog('system', '⚡ Agent 已开始处理指令...', sid)
-    broadcast({ type: 'run.started', session_id: sid })
+    broadcast({
+      type: 'run.started',
+      session_id: sid,
+      activeSessions: Array.from(activeSessionsMap.values())
+    })
   })
 
   chatRunSocket.on('run.failed', (data) => {
     if (currentRunningSessionId === data?.session_id) {
       currentRunningSessionId = null
     }
+    if (data?.session_id) {
+      activeSessionsMap.delete(data.session_id)
+    }
     appendLog('error', `运行异常: ${data.error}`, data.session_id)
-    broadcast({ type: 'run.failed', session_id: data.session_id, error: data.error })
+    broadcast({
+      type: 'run.failed',
+      session_id: data.session_id,
+      error: data.error,
+      activeSessions: Array.from(activeSessionsMap.values())
+    })
   })
 
   chatRunSocket.on('run.completed', (data) => {
@@ -715,6 +770,7 @@ async function connectToHermes() {
     if (currentRunningSessionId === sessionId) {
       currentRunningSessionId = null
     }
+    activeSessionsMap.delete(sessionId)
 
     // Debounce rapid intermediate tool turns (2500ms trailing debounce per session)
     if (sessionRunDebounceTimers.has(sessionId)) {
@@ -744,14 +800,24 @@ async function connectToHermes() {
         if (now - lastNotified < 10000 && lastPrompt <= lastNotified) {
           console.log('[Hermes Socket] Suppressing duplicate completion push within 10s window for session:', sessionId)
           latestCompletion = summary
-          broadcast({ type: 'run.completed_silent', summary, allSummaries: getTaskSummaries(25) })
+          broadcast({
+            type: 'run.completed_silent',
+            summary,
+            allSummaries: getTaskSummaries(25),
+            activeSessions: Array.from(activeSessionsMap.values())
+          })
           return
         }
 
         sessionLastNotifiedTime.set(sessionId, now)
         latestCompletion = summary
         const allSummaries = getTaskSummaries(25)
-        broadcast({ type: 'run.completed', summary, allSummaries })
+        broadcast({
+          type: 'run.completed',
+          summary,
+          allSummaries,
+          activeSessions: Array.from(activeSessionsMap.values())
+        })
         appendLog('complete', `✅ 任务执行完毕 (输出: ${summary.stats.outputTokens}, 费用: ${summary.stats.estimatedCost})`, sessionId)
 
         if (config.ntfyTopic) {
@@ -1065,7 +1131,15 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (url.pathname === '/api/sessions') {
-    const sessions = getRecentSessions(15)
+    const rawSessions = getRecentSessions(20)
+    const sessions = rawSessions.map(s => {
+      const active = activeSessionsMap.get(s.id)
+      return {
+        ...s,
+        is_active: Boolean(active),
+        thought: active?.thought || ''
+      }
+    })
     res.writeHead(200, { 'Content-Type': 'application/json' })
     res.end(JSON.stringify(sessions))
     return
@@ -1146,8 +1220,16 @@ const server = http.createServer(async (req, res) => {
         if (sid && chatRunSocket?.connected) {
           console.log(`[Chat Abort] User requested abort for session: ${sid}`)
           chatRunSocket.emit('abort', { session_id: sid })
+          activeSessionsMap.delete(sid)
+          if (currentRunningSessionId === sid) {
+            currentRunningSessionId = null
+          }
           appendLog('system', '⏹️ 用户请求终止当前任务', sid)
-          broadcast({ type: 'chat.aborted', session_id: sid })
+          broadcast({
+            type: 'chat.aborted',
+            session_id: sid,
+            activeSessions: Array.from(activeSessionsMap.values())
+          })
         }
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end(JSON.stringify({ success: true, session_id: sid }))
@@ -1214,10 +1296,11 @@ wss.on('connection', (ws) => {
     approvals: Array.from(activeApprovals.values()),
     clarifies: Array.from(activeClarifies.values()),
     runningSessionId: currentRunningSessionId,
+    activeSessions: Array.from(activeSessionsMap.values()),
     logs: recentLogs.slice(-30),
     latestCompletion: latestCompletion || getLatestTaskSummary(),
     allSummaries: getTaskSummaries(25),
-    recentSessions: getRecentSessions(15)
+    recentSessions: getRecentSessions(20)
   }))
 
   ws.on('close', () => {
@@ -1259,8 +1342,16 @@ wss.on('connection', (ws) => {
         const sid = data.session_id || latestCompletion?.sessionId
         if (sid && chatRunSocket?.connected) {
           chatRunSocket.emit('abort', { session_id: sid })
+          activeSessionsMap.delete(sid)
+          if (currentRunningSessionId === sid) {
+            currentRunningSessionId = null
+          }
           appendLog('system', '⏹️ 用户请求终止当前任务', sid)
-          broadcast({ type: 'chat.aborted', session_id: sid })
+          broadcast({
+            type: 'chat.aborted',
+            session_id: sid,
+            activeSessions: Array.from(activeSessionsMap.values())
+          })
         }
       } else if (data.type === 'approval.respond') {
         const { session_id, approval_id, choice } = data
