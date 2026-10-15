@@ -294,75 +294,9 @@
       gap: 14px;
     }
 
-    /* DESKTOP QR CODE CARD */
+    /* DESKTOP QR CODE CARD (HIDDEN - accessible via toolbar '📱 扫码连接' modal) */
     .desktop-qr-card {
-      background: linear-gradient(135deg, #18191e 0%, #1e222d 100%);
-      border: 1px solid rgba(59, 130, 246, 0.35);
-      border-radius: 16px;
-      padding: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .desktop-qr-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 6px;
-    }
-
-    .desktop-qr-desc {
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 12px;
-    }
-
-    .desktop-qr-url-box {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #0f1013;
-      border: 1px solid var(--card-border);
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: #93c5fd;
-    }
-
-    .desktop-qr-copy-btn {
-      background: var(--accent);
-      border: none;
-      color: #fff;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .desktop-qr-right {
-      background: #fff;
-      padding: 8px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .desktop-qr-img {
-      width: 120px;
-      height: 120px;
-      display: block;
-    }
-
-    @media (max-width: 640px) {
-      .desktop-qr-card {
-        display: none;
-      }
+      display: none !important;
     }
 
     /* URGENT APPROVAL CARD */
@@ -1853,20 +1787,6 @@
       </div>
     </div>
 
-    <!-- Desktop QR Code Preview Card -->
-    <div class="desktop-qr-card" id="desktopQrCard">
-      <div>
-        <div class="desktop-qr-title">📱 手机扫码直达看护</div>
-        <div class="desktop-qr-desc">手机连接同一 Wi-Fi，打开微信或系统相机扫码，即可同步接收审批提醒与结果总结。</div>
-        <div class="desktop-qr-url-box">
-          <span id="desktopQrUrl">加载中...</span>
-          <button class="desktop-qr-copy-btn" id="desktopQrCopyBtn">复制</button>
-        </div>
-      </div>
-      <div class="desktop-qr-right">
-        <img class="desktop-qr-img" id="desktopQrImg" src="" alt="QR Code" />
-      </div>
-    </div>
 
     <!-- 1. Pending Approvals Area -->
     <div id="approvalsArea"></div>
@@ -1966,17 +1886,20 @@
 
   <!-- QR Popup Modal -->
   <div class="modal-overlay" id="qrModalOverlay">
-    <div class="modal-box">
-      <button style="position: absolute; top: 14px; right: 14px; background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer;" id="closeQrModalBtn">&times;</button>
-      <div style="font-size: 18px; font-weight: 700; margin-bottom: 6px;">📱 手机扫码连接</div>
-      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">手机连接同一 Wi-Fi，用微信或相机扫一扫</div>
-      <div style="background: #fff; padding: 12px; border-radius: 14px; display: inline-block; margin-bottom: 16px;">
-        <img id="modalQrImg" src="" style="width: 200px; height: 200px; display: block;" alt="QR Code" />
+    <div class="modal-box" style="width: 440px; max-width: 92vw;">
+      <button class="modal-close-btn" style="position: absolute; top: 14px; right: 14px;" id="closeQrModalBtn">&times;</button>
+      <div style="font-size: 18px; font-weight: 700; margin-bottom: 6px;">📱 手机扫码直达看护</div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5;">手机连接同一 Wi-Fi，打开微信或系统相机扫码，即可同步接收审批提醒与结果总结。</div>
+      <div style="background: #fff; padding: 12px; border-radius: 14px; display: inline-block; margin-bottom: 14px;">
+        <img id="modalQrImg" src="" style="width: 190px; height: 190px; display: block;" alt="QR Code" />
       </div>
-      <div style="background: #0f1013; padding: 8px 12px; border-radius: 8px; font-family: monospace; font-size: 13px; color: #93c5fd; margin-bottom: 12px;" id="modalQrUrl">
-        ...
+      <div style="background: #0f1013; border: 1px solid var(--card-border); padding: 8px 12px; border-radius: 8px; font-family: monospace; font-size: 13px; color: #93c5fd; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+        <span id="modalQrUrl" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">...</span>
+        <button class="desktop-qr-copy-btn" id="modalCopyBtn" style="padding: 5px 14px; font-size: 12px; flex-shrink: 0;">复制</button>
       </div>
-      <button class="desktop-qr-copy-btn" id="modalCopyBtn" style="padding: 8px 20px; font-size: 13px; width: 100%;">复制链接</button>
+      <div style="display: flex; gap: 8px; justify-content: center;">
+        <button class="tool-btn" id="modalRefreshIpBtn" style="font-size: 12px; padding: 6px 14px;">🔄 刷新网络</button>
+      </div>
     </div>
   </div>
 
@@ -2358,6 +2281,7 @@
     // QR Modal Controls
     const qrModalOverlay = document.getElementById('qrModalOverlay');
     document.getElementById('qrModalBtn').addEventListener('click', () => {
+      loadInfo();
       qrModalOverlay.classList.add('active');
     });
     document.getElementById('closeQrModalBtn').addEventListener('click', () => {
@@ -2422,8 +2346,24 @@
         setTimeout(() => btn.textContent = old, 2000);
       }
     }
-    document.getElementById('desktopQrCopyBtn').addEventListener('click', () => copyUrl('desktopQrCopyBtn'));
-    document.getElementById('modalCopyBtn').addEventListener('click', () => copyUrl('modalCopyBtn'));
+    const desktopQrCopyBtn = document.getElementById('desktopQrCopyBtn');
+    if (desktopQrCopyBtn) {
+      desktopQrCopyBtn.addEventListener('click', () => copyUrl('desktopQrCopyBtn'));
+    }
+    const modalCopyBtn = document.getElementById('modalCopyBtn');
+    if (modalCopyBtn) {
+      modalCopyBtn.addEventListener('click', () => copyUrl('modalCopyBtn'));
+    }
+
+    const modalRefreshIpBtn = document.getElementById('modalRefreshIpBtn');
+    if (modalRefreshIpBtn) {
+      modalRefreshIpBtn.addEventListener('click', async () => {
+        modalRefreshIpBtn.textContent = '🔄 刷新中...';
+        await loadInfo();
+        modalRefreshIpBtn.textContent = '已刷新';
+        setTimeout(() => { modalRefreshIpBtn.textContent = '🔄 刷新网络'; }, 2000);
+      });
+    }
 
     // Fetch Info & QR
     async function loadInfo() {
@@ -2432,11 +2372,15 @@
         if (res.ok) {
           const data = await res.json();
           currentLanUrl = data.lanUrl;
-          document.getElementById('desktopQrUrl').textContent = data.lanUrl;
-          document.getElementById('modalQrUrl').textContent = data.lanUrl;
+          const desktopQrUrl = document.getElementById('desktopQrUrl');
+          if (desktopQrUrl) desktopQrUrl.textContent = data.lanUrl;
+          const modalQrUrl = document.getElementById('modalQrUrl');
+          if (modalQrUrl) modalQrUrl.textContent = data.lanUrl;
           if (data.qrDataUrl) {
-            document.getElementById('desktopQrImg').src = data.qrDataUrl;
-            document.getElementById('modalQrImg').src = data.qrDataUrl;
+            const desktopQrImg = document.getElementById('desktopQrImg');
+            if (desktopQrImg) desktopQrImg.src = data.qrDataUrl;
+            const modalQrImg = document.getElementById('modalQrImg');
+            if (modalQrImg) modalQrImg.src = data.qrDataUrl;
           }
           if (data.ntfyTopic) {
             document.getElementById('ntfyTopicDisplay').textContent = data.ntfyTopic;
