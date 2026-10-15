@@ -2624,6 +2624,10 @@
     let activeSummaryIndex = 0;
     let currentAiOutput = '';
     let isRenderMarkdown = true;
+    let currentActiveSessionId = '';
+    let currentActiveSessionTitle = '';
+    let recentSessionsList = [];
+    const activeSessionsMap = new Map(); // sessionId -> { sessionId, title, thought, status }
 
     function renderHistoryPills() {
       if (!allSummaries || allSummaries.length === 0) {
@@ -2703,18 +2707,37 @@
       const urlParams = new URLSearchParams(window.location.search);
       const targetMsg = urlParams.get('msg');
       const targetRun = urlParams.get('run');
-      let targetIndex = 0;
       if (targetMsg || targetRun) {
         const found = allSummaries.findIndex(s => 
           (targetMsg && String(s.messageId) === String(targetMsg)) || 
           (targetRun && String(s.runId) === String(targetRun))
         );
-        if (found !== -1) targetIndex = found;
-      } else if (currentActiveSessionId) {
-        const found = allSummaries.findIndex(s => s.sessionId === currentActiveSessionId);
-        if (found !== -1) targetIndex = found;
+        if (found !== -1) {
+          selectSummary(found);
+          return;
+        }
       }
-      selectSummary(targetIndex);
+
+      // If current active session is active/running, show its live active view
+      if (currentActiveSessionId && activeSessionsMap && activeSessionsMap.has(currentActiveSessionId)) {
+        showActiveSessionView(currentActiveSessionId);
+        return;
+      }
+
+      if (currentActiveSessionId) {
+        const found = allSummaries.findIndex(s => s.sessionId === currentActiveSessionId);
+        if (found !== -1) {
+          selectSummary(found);
+          return;
+        } else {
+          fetchSessionDetails(currentActiveSessionId);
+          return;
+        }
+      }
+
+      if (allSummaries && allSummaries.length > 0) {
+        selectSummary(0);
+      }
     }
 
     function renderMarkdownFallback(src) {
@@ -3269,11 +3292,26 @@
           recentSessionsList = data.recentSessions;
         }
 
-        // Determine active session with clear priority:
-        // 1. URL parameter ?approval=... (direct link from notification)
-        // 2. URL parameter ?session=...
-        // 3. Pending approval / clarify or active running task
-        // 4. Most recently active session from Hermes (recentSessionsList[0])
+        // 1. Populate active sessions first
+        activeSessionsMap.clear();
+        if (data.activeSessions && data.activeSessions.length > 0) {
+          data.activeSessions.forEach(s => activeSessionsMap.set(s.sessionId, s));
+        } else if (data.runningSessionId) {
+          activeSessionsMap.set(data.runningSessionId, {
+            sessionId: data.runningSessionId,
+            title: getSessionTitle(data.runningSessionId),
+            thought: 'AI 正在处理指令...',
+            status: 'running'
+          });
+        }
+        renderActiveSessionsTopBar();
+
+        // 2. Determine initial session to display:
+        // Priority 1: URL parameter ?approval=... or ?session=...
+        // Priority 2: Currently running active session (activeSessionsMap)
+        // Priority 3: Pending approvals or clarifies
+        // Priority 4: Most recent session from Hermes
+        // Priority 5: Latest completion
         const urlParams = new URLSearchParams(window.location.search);
         const urlApproval = urlParams.get('approval');
         const urlSid = urlParams.get('session');
@@ -3286,32 +3324,27 @@
         } else if (urlSid) {
           const matched = recentSessionsList.find(s => s.id === urlSid);
           setCurrentSession(urlSid, matched?.title || urlSid);
-        } else if (!currentActiveSessionId) {
-          const pendingApp = (data.approvals || [])[0];
-          const pendingClar = (data.clarifies || [])[0];
-          const pendingSid = pendingApp?.session_id || pendingClar?.session_id || data.runningSessionId;
-          if (pendingSid) {
-            const matched = recentSessionsList.find(s => s.id === pendingSid);
-            setCurrentSession(pendingSid, matched?.title || pendingSid);
-          } else if (recentSessionsList && recentSessionsList.length > 0) {
-            setCurrentSession(recentSessionsList[0].id, recentSessionsList[0].title);
-          } else if (allSummaries[0]?.sessionId) {
-            setCurrentSession(allSummaries[0].sessionId, allSummaries[0].sessionTitle);
+        } else {
+          // If there is an active running session, ALWAYS show it first!
+          const activeSid = activeSessionsMap.keys().next().value;
+          if (activeSid) {
+            const matched = recentSessionsList.find(s => s.id === activeSid);
+            setCurrentSession(activeSid, matched?.title || activeSid);
+          } else {
+            const pendingApp = (data.approvals || [])[0];
+            const pendingClar = (data.clarifies || [])[0];
+            const pendingSid = pendingApp?.session_id || pendingClar?.session_id || data.runningSessionId;
+            if (pendingSid) {
+              const matched = recentSessionsList.find(s => s.id === pendingSid);
+              setCurrentSession(pendingSid, matched?.title || pendingSid);
+            } else if (recentSessionsList && recentSessionsList.length > 0) {
+              setCurrentSession(recentSessionsList[0].id, recentSessionsList[0].title);
+            } else if (allSummaries[0]?.sessionId) {
+              setCurrentSession(allSummaries[0].sessionId, allSummaries[0].sessionTitle);
+            }
           }
         }
 
-        if (data.activeSessions) {
-          activeSessionsMap.clear();
-          data.activeSessions.forEach(s => activeSessionsMap.set(s.sessionId, s));
-        } else if (data.runningSessionId) {
-          activeSessionsMap.set(data.runningSessionId, {
-            sessionId: data.runningSessionId,
-            title: getSessionTitle(data.runningSessionId),
-            thought: 'AI 正在处理指令...',
-            status: 'running'
-          });
-        }
-        renderActiveSessionsTopBar();
         updateCompletionStatusIcon();
 
         if (data.allSummaries && data.allSummaries.length > 0) {
@@ -3320,6 +3353,8 @@
         } else if (data.latestCompletion) {
           allSummaries = [data.latestCompletion];
           initSummarySelection();
+        } else if (currentActiveSessionId && activeSessionsMap.has(currentActiveSessionId)) {
+          showActiveSessionView(currentActiveSessionId);
         }
       } else if (data.type === 'auto_approve_changed') {
         updateAutoApproveUI(Boolean(data.enabled));
@@ -3566,10 +3601,7 @@
     // ==========================================
     // Mobile Chat Bar & Session Controls
     // ==========================================
-    let currentActiveSessionId = '';
-    let currentActiveSessionTitle = '';
-    let recentSessionsList = [];
-    const activeSessionsMap = new Map(); // sessionId -> { sessionId, title, thought, status }
+
 
     const chatBarTop = document.getElementById('chatBarTop');
     const chatTextInput = document.getElementById('chatTextInput');
@@ -3684,6 +3716,135 @@
       completionSessionTrigger.addEventListener('click', toggleCompletionDropdown);
     }
 
+    async function showActiveSessionView(sid) {
+      if (!sid) return;
+      const activeItem = activeSessionsMap.get(sid);
+      const title = activeItem?.title || getSessionTitle(sid);
+      setCurrentSession(sid, title);
+
+      completionCard.style.display = 'block';
+      updateCompletionStatusIcon();
+
+      if (completionTimeText) {
+        completionTimeText.textContent = '运行中';
+      }
+
+      const usageCompactText = document.getElementById('usageCompactText');
+      if (usageCompactText) {
+        usageCompactText.textContent = `⚡ 正在实时执行中...`;
+      }
+
+      try {
+        const res = await fetch(`/api/chat/messages?session=${encodeURIComponent(sid)}`);
+        if (res.ok) {
+          const data = await res.json();
+          const msgs = data.messages || [];
+          for (let i = msgs.length - 1; i >= 0; i--) {
+            if (msgs[i].role === 'user') {
+              showUserPrompt(msgs[i].content, msgs[i].timestamp);
+              break;
+            }
+          }
+        }
+      } catch {}
+
+      startStreamingWaterfall();
+      if (activeItem?.thought) {
+        appendStreamingThought(activeItem.thought);
+      }
+    }
+
+    async function fetchSessionDetails(sid, title) {
+      if (!sid) return;
+      const sTitle = title || getSessionTitle(sid);
+      setCurrentSession(sid, sTitle);
+      completionCard.style.display = 'block';
+      updateCompletionStatusIcon();
+
+      try {
+        const sumRes = await fetch(`/api/summary?session=${encodeURIComponent(sid)}`);
+        if (sumRes.ok) {
+          const sum = await sumRes.json();
+          if (sum && sum.stats && (sum.stats.outputTokens || sum.output)) {
+            renderCompletionCard(sum);
+            return;
+          }
+        }
+      } catch {}
+
+      try {
+        const msgRes = await fetch(`/api/chat/messages?session=${encodeURIComponent(sid)}`);
+        if (msgRes.ok) {
+          const data = await msgRes.json();
+          const msgs = data.messages || [];
+          if (msgs.length > 0) {
+            let lastUserMsg = null;
+            let lastAssistantMsg = null;
+            for (let i = msgs.length - 1; i >= 0; i--) {
+              if (!lastAssistantMsg && msgs[i].role === 'assistant') {
+                lastAssistantMsg = msgs[i];
+              }
+              if (!lastUserMsg && msgs[i].role === 'user') {
+                lastUserMsg = msgs[i];
+              }
+              if (lastUserMsg && lastAssistantMsg) break;
+            }
+
+            if (lastUserMsg) {
+              showUserPrompt(lastUserMsg.content, lastUserMsg.timestamp);
+            }
+
+            if (lastAssistantMsg) {
+              isStreaming = false;
+              let assistantContent = lastAssistantMsg.content || '';
+              if (assistantContent.startsWith('[{"type":')) {
+                try {
+                  const parsed = JSON.parse(assistantContent);
+                  assistantContent = parsed.map(p => p.text || '').join('\n');
+                } catch {}
+              }
+              currentAiOutput = assistantContent;
+              currentAiThought = lastAssistantMsg.reasoning || '';
+              renderAiText(currentAiThought);
+
+              if (completionTimeText) {
+                completionTimeText.textContent = lastAssistantMsg.timestamp ? new Date(lastAssistantMsg.timestamp * (lastAssistantMsg.timestamp > 1e11 ? 1 : 1000)).toLocaleTimeString() : '已记录';
+              }
+              const usageCompactText = document.getElementById('usageCompactText');
+              if (usageCompactText) {
+                usageCompactText.textContent = `💬 会话记录 · 共 ${msgs.length} 条消息`;
+              }
+              return;
+            }
+          }
+        }
+      } catch {}
+
+      isStreaming = false;
+      currentAiOutput = '（该会话暂无执行结果）';
+      currentAiThought = '';
+      renderAiText('');
+      if (completionTimeText) completionTimeText.textContent = '暂无记录';
+    }
+
+    async function switchSessionView(sid, title) {
+      if (!sid) return;
+      setCurrentSession(sid, title);
+
+      if (activeSessionsMap.has(sid)) {
+        await showActiveSessionView(sid);
+        return;
+      }
+
+      const foundIdx = allSummaries.findIndex(sum => sum.sessionId === sid);
+      if (foundIdx !== -1) {
+        selectSummary(foundIdx);
+        return;
+      }
+
+      await fetchSessionDetails(sid, title);
+    }
+
     async function renderCompletionDropdownList() {
       if (!completionDropdownMenu) return;
       try {
@@ -3702,11 +3863,13 @@
         const isActive = activeSessionsMap.has(s.id) || s.is_active;
         const isCurrent = s.id === currentActiveSessionId;
         const timeStr = s.last_active ? new Date(s.last_active * (s.last_active > 1e11 ? 1 : 1000)).toLocaleTimeString() : '';
+        const titleSafe = escapeHtml(s.title || s.id);
+        const sidSafe = escapeHtml(s.id);
         return `
-          <div class="completion-dropdown-item ${isCurrent ? 'active' : ''}" onclick="selectSessionFromDropdown('${escapeHtml(s.id)}', '${escapeHtml(s.title || s.id)}')">
+          <div class="completion-dropdown-item ${isCurrent ? 'active' : ''}" data-sid="${sidSafe}">
             <div class="dropdown-item-left">
               <span class="${isActive ? 'dot-live' : 'dot-idle'}" title="${isActive ? '会话正在执行中' : '空闲'}"></span>
-              <span class="dropdown-item-title" title="${escapeHtml(s.title || s.id)}">${escapeHtml(s.title || s.id)}</span>
+              <span class="dropdown-item-title" title="${titleSafe}">${titleSafe}</span>
             </div>
             <div class="dropdown-item-right">
               ${isActive ? '<span class="tag-live">运行中</span>' : ''}
@@ -3717,27 +3880,28 @@
       }).join('');
     }
 
+    if (completionDropdownMenu) {
+      completionDropdownMenu.addEventListener('click', (e) => {
+        const item = e.target.closest('.completion-dropdown-item');
+        if (!item) return;
+        const sid = item.dataset.sid;
+        if (!sid) return;
+        const found = recentSessionsList.find(s => s.id === sid);
+        const title = found?.title || sid;
+        closeCompletionDropdown();
+        switchSessionView(sid, title);
+      });
+    }
+
     window.selectSessionFromDropdown = function(sid, title) {
       closeCompletionDropdown();
-      setCurrentSession(sid, title);
-      const foundIdx = allSummaries.findIndex(sum => sum.sessionId === sid);
-      if (foundIdx !== -1) {
-        selectSummary(foundIdx);
-      } else {
-        fetchSummaryForSession(sid);
-      }
+      switchSessionView(sid, title);
     };
 
     window.switchSessionFromChip = function(sid) {
       const item = activeSessionsMap.get(sid);
       const title = item?.title || getSessionTitle(sid);
-      setCurrentSession(sid, title);
-      const foundIdx = allSummaries.findIndex(sum => sum.sessionId === sid);
-      if (foundIdx !== -1) {
-        selectSummary(foundIdx);
-      } else {
-        fetchSummaryForSession(sid);
-      }
+      switchSessionView(sid, title);
     };
 
     window.abortSpecificSession = async function(sid, event) {
@@ -3907,35 +4071,15 @@
           </div>
         `;
         item.onclick = () => {
-          setCurrentSession(s.id, s.title);
           sessionModalOverlay.classList.remove('active');
-          const foundIdx = allSummaries.findIndex(sum => sum.sessionId === s.id);
-          if (foundIdx !== -1) {
-            selectSummary(foundIdx);
-          } else {
-            fetchSummaryForSession(s.id);
-          }
+          switchSessionView(s.id, s.title);
         };
         sessionListContainer.appendChild(item);
       });
     }
 
     async function fetchSummaryForSession(sid) {
-      try {
-        const res = await fetch(`/api/summary?session=${encodeURIComponent(sid)}`);
-        if (res.ok) {
-          const sum = await res.json();
-          if (sum && sum.stats) {
-            renderCompletionCard(sum);
-          } else {
-            completionCard.style.display = 'none';
-          }
-        } else {
-          completionCard.style.display = 'none';
-        }
-      } catch {
-        completionCard.style.display = 'none';
-      }
+      return fetchSessionDetails(sid);
     }
 
     // Chat History Modal
