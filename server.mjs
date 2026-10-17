@@ -109,6 +109,7 @@ function ensureWidgetInjected() {
 }
 
 ensureWidgetInjected()
+setInterval(ensureWidgetInjected, 60_000)
 
 function formatTokens(num) {
   if (num == null) return '0'
@@ -569,6 +570,7 @@ async function connectToHermes() {
   chatRunSocket.on('connect', () => {
     isHermesConnected = true
     joinedSessions.clear()
+    ensureWidgetInjected()
     console.log('[Hermes Socket] Connected to /chat-run')
     appendLog('system', '已成功连接至 Hermes Agent 核心服务')
     broadcast({ type: 'status', hermesConnected: true })
